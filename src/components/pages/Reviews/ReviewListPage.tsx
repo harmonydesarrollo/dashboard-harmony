@@ -249,7 +249,7 @@ const ReviewList = () => {
             <TableRow>
               <TableCell style={{ fontWeight: 700 }}>NOMBRE</TableCell>
               <TableCell style={{ fontWeight: 700 }}>DESCRIPCIÓN</TableCell>
-              <TableCell style={{ fontWeight: 700 }}>LOGOTIPO</TableCell>
+              <TableCell style={{ fontWeight: 700 }}>FOTO</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -280,12 +280,19 @@ const ReviewList = () => {
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
-      <Dialog open={modalOpen} onClose={closeModal}>
+      <Dialog
+        open={modalOpen}
+        onClose={(event, reason) => {
+          if (reason !== 'backdropClick') {
+            closeModal();
+          }
+        }}
+      >
         <DialogTitle>{selectedReview ? 'Editar Reseña' : 'Agregar Reseña'}</DialogTitle>
         <DialogContent>
           <TextField
             margin="normal"
-            label="Nombre de la Empresa"
+            label="Nombre"
             variant="outlined"
             fullWidth
             value={title}
@@ -293,7 +300,7 @@ const ReviewList = () => {
           />
           <TextField
             margin="normal"
-            label="Resumen"
+            label="Comentario"
             variant="outlined"
             fullWidth
             multiline
