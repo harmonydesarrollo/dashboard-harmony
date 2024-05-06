@@ -1,0 +1,34 @@
+[
+  {
+    "user": {
+      "_id": "66274d70e5fced43f80930ee",
+      "firstName": "Brandon Baushell",
+      "lastName": "Hernández",
+      "middleName": "Granados",
+      "gender": "",
+      "birthday": "",
+      "fullName": "Brandon baushshsh Hernández Granados",
+      "idSpecialty": "6628e08477762c4910c36187",
+      "idBranch": "662741f6ac5568ad604b8b48",
+      "idRol": "66274451ac5568ad604b8b4c",
+      "photo": "https://bucket-harmony.s3.amazonaws.com/test-profile-baushell.jpeg",
+      "specialty": "Fisioterapia General"
+    }
+  },
+  {
+    "user": {
+      "_id": "6629efd0a737a8ef7a0ecdb6",
+      "firstName": "Jorge",
+      "lastName": "Montiel",
+      "middleName": "Salguero",
+      "gender": "",
+      "birthday": "",
+      "fullName": "Jorge Montiel Salguero",
+      "idSpecialty": "6628e09177762c4910c36188",
+      "idBranch": "662741f6ac5568ad604b8b48",
+      "idRol": "66274451ac5568ad604b8b4c",
+      "photo": "https://bucket-harmony.s3.amazonaws.com/test-profile-baushell.jpeg",
+      "specialty": "Fisioterapia niños"
+    }
+  }
+]

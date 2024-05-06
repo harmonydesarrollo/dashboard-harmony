@@ -1,0 +1,166 @@
+import React, { useState } from 'react';
+import TableComponent from '../../organisms/TableComponent';
+import RegistrationForm from '../../organisms/Employees/RegistrationForm';
+import { Typography, Button, Box, IconButton, Tooltip } from '@mui/material'; // Importar Box desde @mui/material
+
+import { useNavigate } from 'react-router-dom';
+
+import AddEditPage from './AddEditPage';
+
+const EmployeePage = () => {
+  const navigate = useNavigate();
+  const [showAddEdit, setshowAddEdit] = useState<boolean>(false);
+  const [showAdd, setShowAdd] = useState<boolean>(false);
+  const [dataEdit, setDataEdit] = useState<any>(null);
+
+  const headers = ['id', 'firstName', 'lastName', 'middleName', 'id_specialty', 'fullName', 'specialty', 'photo'];
+  const headerTranslations: { [key: string]: string } = {
+    id: 'ID',
+    fullName: 'NOMBRE COMPLETO',
+    specialty: 'ESPECIALIDAD',
+    photo: 'FOTOGRAFÍA',
+    firstName: 'Nombre',
+    lastName: 'Apellido',
+    middleName: 'Segundo nombre',
+    idspecialty: 'id_specialty',
+  };
+
+  const translatedHeaders = headers.map((header) => headerTranslations[header] || header);
+  console.log({ translatedHeaders });
+
+  const rows = [
+    [
+      '660bf22baa062a91aef57aa1',
+      'Brandon Baushell',
+      'Hernández',
+      'Granados',
+      '160bf22baa062a91aef57aa1',
+      'Brandon Baushell Hernández Granados',
+      'Fisioterapia General',
+      'https://isac.med.ec/wp-content/uploads/2021/06/perfil.png',
+    ],
+    [
+      '660bf22baa062a91aef57aa2',
+      'José',
+      'Hernandez',
+      'Hernandez',
+      '260bf22baa062a91aef57aa1',
+      'José Hernandez Hernandez',
+      'Fisioterapia Ortopédica',
+      'https://thumbs.dreamstime.com/b/doctor-en-perfil-4979810.jpg',
+    ],
+    [
+      '660bf22baa062a91aef57aa3',
+      'Maria',
+      'Hernandez',
+      'Martinez',
+      '360bf22baa062a91aef57aa1',
+      'Maria Hernandez Martinez',
+      'Fisioterapia Neurológica',
+      'https://previews.123rf.com/images/yupiramos/yupiramos1607/yupiramos160705617/59613225-el-doctor-avatar-perfil-aisl%C3%B3-el-icono-gr%C3%A1fico-del-ejemplo-del-vector.jpg',
+    ],
+    [
+      '660bf22baa062a91aef57aa4',
+      'Santiago',
+      'Montez',
+      'de Durango',
+      '260bf22baa062a91aef57aa1',
+      'Santiago Montez de Durango',
+      'Fisioterapia Ortopédica',
+      'https://previews.123rf.com/images/yupiramos/yupiramos1607/yupiramos160705616/59613224-el-doctor-avatar-perfil-aisl%C3%B3-el-icono-gr%C3%A1fico-del-ejemplo-del-vector.jpg',
+    ],
+    [
+      '660bf22baa062a91aef57aa5',
+      'Alberto',
+      'Aguilera',
+      'Sanchez',
+      '360bf22baa062a91aef57aa1',
+      'Alberto Aguilera Sanchez',
+      'Fisioterapia Neurológica',
+      'https://studikard.com/wp-content/uploads/2021/02/doctor-perfil.jpg',
+    ],
+    [
+      '660bf22baa062a91aef57aa6',
+      'Pedro',
+      'Torres',
+      'García',
+      '160bf22baa062a91aef57aa1',
+      'Pedro Torres García',
+      'Fisioterapia General',
+      'https://static.vecteezy.com/system/resources/previews/025/379/576/non_2x/employee-avatar-profile-photo-icon-default-businessman-image-vector.jpg',
+    ],
+    [
+      '660bf22baa062a91aef57aa7',
+      'Venancio',
+      'Gallego',
+      'Gallego',
+      '160bf22baa062a91aef57aa1',
+      'Venancio Gallego Gallego',
+      'Fisioterapia General',
+      'https://static.vecteezy.com/system/resources/previews/025/379/576/non_2x/employee-avatar-profile-photo-icon-default-businessman-image-vector.jpg',
+    ],
+  ];
+
+  interface EmployeeData {
+    id: string;
+    firstName: string;
+    lastName: string;
+    middleName: string;
+    specialty: string;
+    photo: string;
+  }
+
+  // Estado para controlar la visibilidad del formulario de registro
+  const [showRegistrationForm, setShowRegistrationForm] = useState(false);
+
+  const [editData, setEditData] = useState<any>({});
+  // Función de manejo de clic de fila
+  const handleRowClick = (rowData: any) => {
+    // Aquí puedes realizar acciones con los datos de la fila, como mostrarlos en un modal
+    console.log('Fila clickeada:', rowData);
+    setshowAddEdit(true);
+    setShowAdd(false);
+    setDataEdit(rowData);
+  };
+
+  // Función de manejo de clic en el botón "Agregar Nuevo"
+  const handleAddNew = () => {
+    setshowAddEdit(true);
+    setShowAdd(true);
+    // Cambiar el estado para mostrar el formulario de registro
+    // navigate('/addEmployee');
+  };
+
+  // Función de manejo de clic en el botón "Cancelar"
+  const handleCancel = () => {
+    // Cambiar el estado para ocultar el formulario de registro
+    setShowRegistrationForm(false);
+  };
+
+  return (
+    <div>
+      {showAddEdit ? (
+        <AddEditPage showAdd={showAdd} data={dataEdit} />
+      ) : (
+        <>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            {' '}
+            {/* Utilizar Box para crear el contenedor flex */}
+            <Typography variant="h3" align="center">
+              Listado de empleados
+            </Typography>
+            {/* Botón de Cancelar */}
+            <Tooltip title="Regresar">
+              <Button variant="contained" color="primary" onClick={handleAddNew} style={{ marginLeft: '10px' }}>
+                Agregar
+              </Button>
+            </Tooltip>
+          </Box>
+          <TableComponent headers={translatedHeaders} rows={rows} onRowClick={handleRowClick} />
+        </>
+      )}
+    </div>
+  );
+};
+
+export default EmployeePage;

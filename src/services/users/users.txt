@@ -1,0 +1,71 @@
+import HarmonyApi from '../config';
+
+//https://develop.d2z36kd8bp7vmy.amplifyapp.com/employees - crear
+async function createEmployee(data: any, token: string): Promise<any> {
+  try {
+    const response = await HarmonyApi.post<any>('employees/', data, {
+      headers: { Authorization: 'Bearer ' + token },
+    });
+
+    return response.data;
+  } catch (e) {
+    throw new Error(JSON.stringify(e));
+  }
+}
+
+//https://develop.d2z36kd8bp7vmy.amplifyapp.com/employees
+async function getAllUsers(token: string): Promise<any> {
+  try {
+    const response = await HarmonyApi.get<any>('users', {
+      headers: { Authorization: 'Bearer ' + token },
+    });
+
+    if (response && response.data) {
+      return response.data;
+    } else {
+      return [];
+    }
+  } catch (e) {
+    throw new Error(JSON.stringify(e));
+  }
+}
+
+// update
+//localhost:3000/employees/66252c0a19da4ddae3ba1eb9 -- update
+async function updateById(id: string, body: any, bearerToken: string): Promise<any> {
+  const response = await HarmonyApi.patch<any>(
+    'btb-employees/' + id,
+    { ...body },
+    {
+      headers: { Authorization: 'Bearer ' + bearerToken },
+    }
+  );
+  if (response.status === 200) {
+    return response;
+  } else {
+    return response;
+  }
+}
+//localhost:3000/employees/ -- eliinar
+async function deleteEmployee(idEmployee: string, token: string): Promise<any> {
+  try {
+    const response = await HarmonyApi.delete<any>('employees/' + idEmployee, {
+      headers: { Authorization: 'Bearer ' + token },
+    });
+
+    if (response.status === 200) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (e) {
+    throw new Error(JSON.stringify(e));
+  }
+}
+
+export const employeeServices = {
+  getAllEmployees: getAllUsers,
+  createEmployee,
+  deleteEmployee,
+  updateById,
+};
