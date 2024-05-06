@@ -279,7 +279,14 @@ const PartnerList = () => {
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
-      <Dialog open={modalOpen} onClose={closeModal}>
+      <Dialog
+        open={modalOpen}
+        onClose={(event, reason) => {
+          if (reason !== 'backdropClick') {
+            closeModal();
+          }
+        }}
+      >
         <DialogTitle>{selectedPartner ? 'Editar Socio' : 'Agregar Socio'}</DialogTitle>
         <DialogContent>
           <TextField
@@ -373,7 +380,7 @@ const PartnerList = () => {
         </DialogActions>
       </Dialog>
       <Button onClick={() => openModal('', null)} variant="contained" color="primary">
-        Agregar Socio
+        NUEVO
       </Button>
     </Container>
   );
