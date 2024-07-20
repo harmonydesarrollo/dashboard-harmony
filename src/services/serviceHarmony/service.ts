@@ -13,12 +13,12 @@ async function createService(data: CreateServices, token: string): Promise<any> 
       }
     }
 
-    console.log(JSON.stringify(modifiedUserInfo));
+    // console.log(JSON.stringify(modifiedUserInfo));
     const response = await HarmonyApi.post<any>('services/', modifiedUserInfo, {
       headers: { Authorization: 'Bearer ' + token },
     });
 
-    console.log(response);
+    // console.log(response);
     return response.data;
   } catch (e) {
     throw new Error(JSON.stringify(e));
@@ -44,7 +44,7 @@ async function getAllServices(token: string): Promise<Services[]> {
       headers: { Authorization: 'Bearer ' + token },
     });
 
-    console.log(response);
+    // console.log(response);
 
     return response && response.data;
   } catch (e) {

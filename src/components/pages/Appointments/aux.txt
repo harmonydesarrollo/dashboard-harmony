@@ -1,0 +1,1248 @@
+// import React, { useState, useEffect } from 'react';
+// import {
+//   Table,
+//   TableBody,
+//   TableCell,
+//   TableContainer,
+//   TableHead,
+//   TableRow,
+//   Paper,
+//   TextField,
+//   Button,
+//   Dialog,
+//   DialogTitle,
+//   DialogContent,
+//   DialogActions,
+//   Typography,
+//   Container,
+//   Tooltip,
+//   Alert,
+//   AlertTitle,
+//   Stack,
+//   TablePagination,
+//   Box,
+//   Backdrop,
+//   CircularProgress,
+// } from '@mui/material';
+
+// import {  appointmentServices } from '../../../services/appointments/appointments';
+// import { CreateAppointments, Appointments, UpdateAppointments } from '../../types/appointments';
+// import { awsServices } from '../../../services/aws/aws'; // Importar awsServices
+
+// const AppointmentList = () => {
+//   const [modalOpen, setModalOpen] = useState<boolean>(false);
+//   const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
+//   const [successOpen, setSuccessOpen] = useState<boolean>(false);
+//   const [action, setAction] = useState<string>('');
+//   const [page, setPage] = useState(0);
+//   const [rowsPerPage, setRowsPerPage] = useState(5);
+//   const [appointments, setAppointments] = useState<Appointments[]>([]);
+//   const [selectedAppointment, setSelectedAppointment] = useState<Appointments | null>(null);
+  
+//   const [fullName, setFullName] = useState<string>('');
+//   const [telephone, setTelephone] = useState<string>('');
+//   const [idService, setIdService] = useState<string>('');
+
+//   const [date, setDate] = useState<string>('');
+//   const [hour, setHour] = useState<string>('');
+//   const [status, setStatus] = useState<string>('');
+
+//   const [searchTerm, setSearchTerm] = useState<string>('');
+//   const [successMessage, setSuccessMessage] = useState<string>('');
+//   const [updatePhoto, setUpdatePhoto] = useState<boolean>(false);
+
+//   const [loading, setLoading] = useState(false);
+//   const [updating, setUpdating] = useState(false);
+
+//   const closeSuccessMessage = () => {
+//     setTimeout(() => {
+//       setSuccessMessage('');
+//     }, 10000); // 10000 milisegundos = 10 segundos
+//   };
+
+//   // useEffect(() => {
+//   //   if (successMessage) {
+//   //     closeSuccessMessage();
+//   //   }
+//   //   const fetchAppointments = async () => {
+//   //     try {
+//   //       const response = await appointmentServices.getAllAppointments('');
+//   //       setAppointments(response);
+//   //     } catch (error) {
+//   //       console.error('Error fetching appointments:', error);
+//   //     }
+//   //   };
+
+//   //   fetchAppointments();
+//   // }, []);
+//   const filterCurrentMonthAppointments = (appointments: Appointments[]) => {
+//     const currentDate = new Date();
+//     const currentMonth = currentDate.getMonth();
+  
+//     return appointments.filter((appointment) => {
+//       const appointmentDate = new Date(appointment.date);
+//       return appointmentDate.getMonth() === currentMonth;
+//     });
+//   };
+  
+
+//   useEffect(() => {
+//     if (successMessage) {
+//       closeSuccessMessage();
+//     }
+//     const fetchAppointments = async () => {
+//       try {
+//         const response = await appointmentServices.getAllAppointments('');
+//         const filteredAppointments = filterCurrentMonthAppointments(response);
+//         setAppointments(filteredAppointments);
+//       } catch (error) {
+//         console.error('Error fetching appointments:', error);
+//       }
+//     };
+  
+//     fetchAppointments();
+//   }, []);
+  
+
+//   const openModal = (appointmentId: string, appointment: Appointments | null = null) => {
+//     const selectedAppointmentData = appointments.find((r) => r._id === appointmentId);
+
+//     if (selectedAppointmentData) {
+//       setSelectedAppointment(selectedAppointmentData);
+//       setFullName(selectedAppointmentData.fullName);
+//       setTelephone(selectedAppointmentData.telephone);
+//       setIdService(selectedAppointmentData.service!);
+      
+//       setDate(selectedAppointmentData.date);
+//       setHour(selectedAppointmentData.hour);
+//       setStatus(selectedAppointmentData.status);
+
+      
+
+
+//     } else {
+//       clearInputFields();
+//     }
+//     setModalOpen(true);
+//   };
+
+//   const handleAddAppointment = async () => {
+//     const newAppointment: CreateAppointments = {
+//       fullName: fullName,
+//       telephone: telephone,
+//       idService: idService,
+//       date: date,
+//       hour: hour,
+//       status: status
+//     };
+
+//     try {
+//       await appointmentServices.createAppointment(newAppointment, ''); // Crear la reseña en el backend
+//       const updatedAppointments = await appointmentServices.getAllAppointments('');
+//       setAppointments(updatedAppointments);
+//       clearInputFields();
+//       closeModal();
+//       setAction('AGREGADA');
+//       setSuccessOpen(true);
+//       setSuccessMessage('Reseña agregada correctamente');
+//       // setConfirmOpen(true); // Aquí se cierra la modal de confirmación después de eliminar la reseña
+//     } catch (error) {
+//       console.error('Error al agregar reseña:', error);
+//     }
+//   };
+
+//   const handleUpdateAppointment = async () => {
+//     if (selectedAppointment) {
+//       setUpdating(true); // Mostrar fondo oscuro y el indicador de carga
+
+//       const updatedAppointment: UpdateAppointments = {
+//         _id: selectedAppointment._id,
+//         fullName: fullName,
+//         telephone: telephone,
+//         date: date,
+//         hour: hour,
+//         status: status
+//       };
+
+//       try {
+
+//         await appointmentServices.updateById(selectedAppointment._id, updatedAppointment, ''); // Actualizar la reseña en el backend
+//         const updatedAppointments = appointments.map((appointment) =>
+//           appointment._id === selectedAppointment._id ? { ...appointment, img: fullName, title: telephone, description: idService } : appointment
+//         );
+
+//         setAppointments(updatedAppointments);
+//         clearInputFields();
+//         closeModal();
+//         setAction('ACTUALIZADA');
+//         setSuccessOpen(true);
+//         setSuccessMessage('Reseña actualizada correctamente');
+//         setUpdating(false); // Ocultar fondo oscuro y el indicador de carga después de completar la actualización
+//         setConfirmOpen(false); // Aquí se cierra la modal de confirmación después de eliminar la reseña
+//       } catch (error) {
+//         console.error('Error al actualizar reseña:', error);
+//       }
+//     }
+//   };
+
+//   function formatearFecha(fechaString: string) {
+//     // Parseamos la cadena de fecha en un objeto Date
+//     const fecha = new Date(fechaString);
+
+//     // Obtenemos el día del mes (con cero inicial si es necesario)
+//     const dia = fecha.getDate().toString().padStart(2, '0');
+
+//     // Obtenemos el mes en formato texto completo
+//     const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+//     const mes = meses[fecha.getMonth()];
+
+//     // Obtenemos el año
+//     const año = fecha.getFullYear();
+
+//     // Formateamos la fecha en el formato deseado
+//     const fechaFormateada = `${dia} de ${mes} del ${año}`;
+
+//     return fechaFormateada;
+// }
+
+//   const handleDeleteAppointment = async () => {
+//     if (selectedAppointment) {
+//       try {
+//         await appointmentServices.deleteAppointment(selectedAppointment._id, '');
+//         const updatedAppointments = appointments.filter((appointment) => appointment._id !== selectedAppointment._id);
+
+//         setAppointments(updatedAppointments);
+//         clearInputFields();
+//         closeModal();
+//         setAction('ELIMINADA');
+//         setSuccessOpen(true);
+//         setSuccessMessage('Reseña eliminada correctamente');
+//         setConfirmOpen(false); // Aquí se cierra la modal de confirmación después de eliminar la reseña
+//       } catch (error) {
+//         console.error('Error al eliminar reseña:', error);
+//       }
+//     }
+//   };
+
+//   const closeModal = () => {
+//     clearInputFields();
+//     setModalOpen(false);
+//     setSuccessOpen(false);
+//   };
+
+//   const clearInputFields = () => {
+//     setTelephone('');
+//     setIdService('');
+//     setFullName('https://bucket-harmony.s3.amazonaws.com/defualt2.png');
+//     setSelectedAppointment(null);
+//   };
+
+//   const handleChangePage = (event: unknown, newPage: number) => {
+//     setPage(newPage);
+//   };
+
+//   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+//     setRowsPerPage(parseInt(event.target.value, 10));
+//     setPage(0);
+//   };
+
+//   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+//     setSearchTerm(event.target.value);
+//   };
+
+//   // const normalizeString = (str: string) => {
+//   //   return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+//   // };
+
+//   // const filteredAppointments = appointments.filter((appointment) =>
+//   //   normalizeString(appointment.fullName).toLowerCase().includes(normalizeString(searchTerm).toLowerCase())
+//   // );
+
+//   const normalizeString = (str: string | undefined) => {
+//     return str?.normalize('NFD').replace(/[\u0300-\u036f]/g, '') || '';
+//   };
+  
+  
+//   const filteredAppointments = appointments.filter((appointment) =>
+//     normalizeString(appointment.date).toLowerCase().includes(normalizeString(searchTerm).toLowerCase())
+//   );
+  
+//     // Obtener el nombre del mes actual
+//     const currentDate = new Date();
+//     const currentMonth = currentDate.toLocaleString('default', { month: 'long' });
+  
+
+//   return (
+//     <Container component="main" maxWidth="md">
+//       <Backdrop open={updating}>
+//         <CircularProgress color="inherit" />
+//       </Backdrop>{' '}
+//       {/* Mostrar el fondo oscuro mientras loading sea true */}
+//       <br />
+//       <br />
+//       {successMessage && (
+//         <Stack sx={{ width: '100%' }} spacing={2}>
+//           <Alert
+//             severity="success"
+//             onClose={() => {
+//               setSuccessMessage('');
+//             }}
+//           >
+//             <AlertTitle>{action}</AlertTitle>
+//             {successMessage}
+//           </Alert>
+//         </Stack>
+//       )}
+//       <div style={{ display: 'flex', alignItems: 'center' }}>
+//       <Typography variant="h3" align="justify" style={{ flexGrow: 1 }}>
+//       CITAS DE {new Date().toLocaleString('default', { month: 'long' }).toUpperCase()}
+//       </Typography>
+//       <Tooltip title="Revisar fechas disponibles">
+//       <Button onClick={() => openModal('', null)} variant="contained" color="success">
+//         Disponibles
+//       </Button>
+//       </Tooltip>
+//     </div>
+//       <Tooltip title="Buscar por fecha">
+//         <TextField
+//           label="Buscar"
+//           variant="outlined"
+//           margin="normal"
+//           value={searchTerm}
+//           onChange={handleSearchChange}
+//           fullWidth
+//         />
+//       </Tooltip>
+//       <br />
+//       <br />
+//       <TableContainer component={Paper}>
+//         <Table>
+//           <TableHead style={{ backgroundColor: '#f0f0f0' }}>
+//             <TableRow>
+//               <TableCell style={{ fontWeight: 700 }}>PACIENTE</TableCell>
+//               <TableCell style={{ fontWeight: 700 }}>TELÉFONO</TableCell>
+//               <TableCell style={{ fontWeight: 700 }}>FECHA</TableCell>
+//               <TableCell style={{ fontWeight: 700 }}>HORA</TableCell>
+//               <TableCell style={{ fontWeight: 700 }}>SERVICIO</TableCell>
+//               <TableCell style={{ fontWeight: 700 }}>ESTATUS</TableCell>
+//             </TableRow>
+//           </TableHead>
+//           <TableBody>
+//             {filteredAppointments.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((appointment) => (
+//               <TableRow
+//                 key={appointment._id}
+//                 onClick={() => openModal(appointment._id, appointment)}
+//                 style={{ cursor: 'pointer' }}
+//                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f5f5f5')}
+//                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'inherit')}
+//               >
+//                 <TableCell>{appointment.fullName}</TableCell>
+//                 <TableCell>{appointment.telephone}</TableCell>
+//                 <TableCell>{formatearFecha(appointment.date)}</TableCell>
+//                 <TableCell>{appointment.hour}</TableCell>
+//                 <TableCell>{appointment.service}</TableCell>
+//                 <TableCell>{appointment.status}</TableCell>
+//               </TableRow>
+//             ))}
+//           </TableBody>
+//         </Table>
+//       </TableContainer>
+//       <TablePagination
+//         rowsPerPageOptions={[5, 10, 25]}
+//         component="div"
+//         count={filteredAppointments.length}
+//         rowsPerPage={rowsPerPage}
+//         page={page}
+//         onPageChange={handleChangePage}
+//         onRowsPerPageChange={handleChangeRowsPerPage}
+//       />
+//       <Dialog open={modalOpen} onClose={closeModal}>
+//         <DialogTitle>{selectedAppointment ? 'Editar Registro' : 'Agregar Registro'}</DialogTitle>
+//         <DialogContent>
+//           <TextField
+//             margin="normal"
+//             label="Nombre completo"
+//             variant="outlined"
+//             fullWidth
+//             value={telephone}
+//             onChange={(e) => setTelephone(e.target.value)}
+//           />
+//           <TextField
+//             margin="normal"
+//             label="Comentarios"
+//             variant="outlined"
+//             fullWidth
+//             multiline
+//             rows={4}
+//             value={idService}
+//             onChange={(e) => setIdService(e.target.value)}
+//           />
+//           {/* Input para cargar imágenes */}
+//           <Tooltip title="Buscar foto del paciente">
+//             <Box mb={2} textAlign="center">
+//               <input
+//                 id="fileInput"
+//                 type="file"
+//                 accept="image/*"
+//                 style={{ display: 'none' }}
+//                 onChange={(e) => {
+//                   const file = e.target.files && e.target.files[0];
+//                   if (file) {
+//                     const reader = new FileReader();
+//                     reader.onloadend = () => {
+//                       if (reader.result) {
+//                         setFullName(reader.result.toString());
+//                       }
+//                     };
+//                     reader.readAsDataURL(file);
+//                   }
+//                 }}
+//               />
+//               <label htmlFor="fileInput">
+//                 <img
+//                   //
+//                   src={fullName || 'https://bucket-harmony.s3.amazonaws.com/defualt2.png'}
+//                   alt="Preview"
+//                   style={{
+//                     width: '33%',
+//                     height: '130px',
+//                     cursor: 'pointer',
+//                     objectFit: 'fill',
+//                     borderRadius: '50%',
+//                   }}
+//                 />
+//               </label>
+//             </Box>
+//           </Tooltip>
+//           {/* Fin del input para cargar imágenes */}
+//         </DialogContent>
+//         <DialogActions>
+//           {selectedAppointment && (
+//             <Button onClick={() => setConfirmOpen(true)} variant="contained" color="error">
+//               Eliminar
+//             </Button>
+//           )}
+//           <Button onClick={closeModal} variant="outlined" color="primary">
+//             Cancelar
+//           </Button>
+//           <Button
+//             onClick={selectedAppointment ? handleUpdateAppointment : handleAddAppointment}
+//             variant="contained"
+//             color="primary"
+//             disabled={!telephone || !idService}
+//           >
+//             {selectedAppointment ? 'Actualizar' : 'Agregar'}
+//           </Button>
+//         </DialogActions>
+//       </Dialog>
+//       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
+//         <DialogTitle>Confirmar Eliminación</DialogTitle>
+//         <DialogContent>
+//           <Typography variant="body1">¿Está seguro de que desea eliminar esta reseña?</Typography>
+//         </DialogContent>
+//         <DialogActions>
+//           <Button onClick={() => setConfirmOpen(false)} variant="outlined" color="primary">
+//             Cancelar
+//           </Button>
+//           <Button onClick={handleDeleteAppointment} variant="contained" color="error">
+//             Eliminar
+//           </Button>
+//         </DialogActions>
+//       </Dialog>
+//       <Button onClick={() => openModal('', null)} variant="contained" color="primary">
+//         Agregar Registro
+//       </Button>
+//     </Container>
+//   );
+// };
+
+// export default AppointmentList;
+
+
+
+import React, { useState, useEffect } from 'react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  TextField,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Typography,
+  Container,
+  Tooltip,
+  Alert,
+  AlertTitle,
+  Stack,
+  TablePagination,
+  Box,
+  Backdrop,
+  CircularProgress,
+  MenuItem,
+} from '@mui/material';
+
+import { appointmentServices } from '../../../services/appointments/appointments';
+import { CreateAppointments, Appointments, UpdateAppointments } from '../../types/appointments';
+import { awsServices } from '../../../services/aws/aws'; // Importar awsServices
+
+const AppointmentList = () => {
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
+  const [successOpen, setSuccessOpen] = useState<boolean>(false);
+  const [action, setAction] = useState<string>('');
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [appointments, setAppointments] = useState<Appointments[]>([]);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointments | null>(null);
+
+  const [fullName, setFullName] = useState<string>('');
+  const [telephone, setTelephone] = useState<string>('');
+  const [idService, setIdService] = useState<string>('');
+
+  const [date, setDate] = useState<string>('');
+  const [hour, setHour] = useState<string>('');
+  const [status, setStatus] = useState<string>('');
+
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [successMessage, setSuccessMessage] = useState<string>('');
+  const [updatePhoto, setUpdatePhoto] = useState<boolean>(false);
+
+  const [loading, setLoading] = useState(false);
+  const [updating, setUpdating] = useState(false);
+
+  const [availableHours, setAvailableHours] = useState<string[]>([]); // Estado para almacenar los horarios disponibles
+
+  const closeSuccessMessage = () => {
+    setTimeout(() => {
+      setSuccessMessage('');
+    }, 10000); // 10000 milisegundos = 10 segundos
+  };
+
+  const filterCurrentMonthAppointments = (appointments: Appointments[]) => {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+
+    return appointments.filter((appointment) => {
+      const appointmentDate = new Date(appointment.date);
+      return appointmentDate.getMonth() === currentMonth;
+    });
+  };
+
+  useEffect(() => {
+    if (successMessage) {
+      closeSuccessMessage();
+    }
+    const fetchAppointments = async () => {
+      try {
+        const response = await appointmentServices.getAllAppointments('');
+        const filteredAppointments = filterCurrentMonthAppointments(response);
+        setAppointments(filteredAppointments);
+      } catch (error) {
+        console.error('Error fetching appointments:', error);
+      }
+    };
+
+    fetchAppointments();
+  }, []);
+
+  const openModal = async (appointmentId: string, appointment: Appointments | null = null) => {
+    if (appointmentId === '') {
+      // Aquí gestionamos la apertura para mostrar horarios disponibles
+      try {
+        const allAppointments = await appointmentServices.getAllAppointments('');
+        const filteredAppointments = filterCurrentMonthAppointments(allAppointments);
+        const usedHours = filteredAppointments.map((appointment) => appointment.hour);
+        const allHours = [
+          '08:00', '08:30',
+          '09:00', '09:30',
+          '10:00', '10:30',
+          '11:00', '11:30',
+          '12:00', '12:30',
+          '13:00', '13:30',
+          '14:00', '14:30',
+          '15:00', '15:30',
+          '16:00', '16:30',
+          '17:00', '17:30'
+        ];        
+        const availableHours = allHours.filter((hour) => !usedHours.includes(hour));
+        setAvailableHours(availableHours);
+      } catch (error) {
+        console.error('Error fetching appointments:', error);
+      }
+    }
+
+    const selectedAppointmentData = appointments.find((r) => r._id === appointmentId);
+
+    if (selectedAppointmentData) {
+      setSelectedAppointment(selectedAppointmentData);
+      setFullName(selectedAppointmentData.fullName);
+      setTelephone(selectedAppointmentData.telephone);
+      setIdService(selectedAppointmentData.service!);
+      setDate(selectedAppointmentData.date);
+      setHour(selectedAppointmentData.hour);
+      setStatus(selectedAppointmentData.status);
+    } else {
+      clearInputFields();
+    }
+    setModalOpen(true);
+  };
+
+  const handleAddAppointment = async () => {
+    const newAppointment: CreateAppointments = {
+      fullName: fullName,
+      telephone: telephone,
+      idService: idService,
+      date: date,
+      hour: hour,
+      status: status,
+    };
+
+    try {
+      await appointmentServices.createAppointment(newAppointment, ''); // Crear la reseña en el backend
+      const updatedAppointments = await appointmentServices.getAllAppointments('');
+      setAppointments(updatedAppointments);
+      clearInputFields();
+      closeModal();
+      setAction('AGREGADA');
+      setSuccessOpen(true);
+      setSuccessMessage('Reseña agregada correctamente');
+      // setConfirmOpen(true); // Aquí se cierra la modal de confirmación después de eliminar la reseña
+    } catch (error) {
+      console.error('Error al agregar reseña:', error);
+    }
+  };
+
+  const handleUpdateAppointment = async () => {
+    if (selectedAppointment) {
+      setUpdating(true); // Mostrar fondo oscuro y el indicador de carga
+
+      const updatedAppointment: UpdateAppointments = {
+        _id: selectedAppointment._id,
+        fullName: fullName,
+        telephone: telephone,
+        date: date,
+        hour: hour,
+        status: status,
+      };
+
+      try {
+        await appointmentServices.updateById(selectedAppointment._id, updatedAppointment, ''); // Actualizar la reseña en el backend
+        const updatedAppointments = appointments.map((appointment) =>
+          appointment._id === selectedAppointment._id
+            ? { ...appointment, img: fullName, title: telephone, description: idService }
+            : appointment
+        );
+
+        setAppointments(updatedAppointments);
+        clearInputFields();
+        closeModal();
+        setAction('ACTUALIZADA');
+        setSuccessOpen(true);
+        setSuccessMessage('Reseña actualizada correctamente');
+        setUpdating(false); // Ocultar fondo oscuro y el indicador de carga después de completar la actualización
+        setConfirmOpen(false); // Aquí se cierra la modal de confirmación después de eliminar la reseña
+      } catch (error) {
+        console.error('Error al actualizar reseña:', error);
+      }
+    }
+  };
+
+  function formatearFecha(fechaString: string) {
+    // Parseamos la cadena de fecha en un objeto Date
+    const fecha = new Date(fechaString);
+
+    // Obtenemos el día del mes (con cero inicial si es necesario)
+    const dia = fecha.getDate().toString().padStart(2, '0');
+
+    // Obtenemos el mes en formato texto completo
+    const meses = [
+      'Enero',
+      'Febrero',
+      'Marzo',
+      'Abril',
+      'Mayo',
+      'Junio',
+      'Julio',
+      'Agosto',
+      'Septiembre',
+      'Octubre',
+      'Noviembre',
+      'Diciembre',
+    ];
+    const mes = meses[fecha.getMonth()];
+
+    // Obtenemos el año
+    const año = fecha.getFullYear();
+
+    // Formateamos la fecha en el formato deseado
+    const fechaFormateada = `${dia} de ${mes} del ${año}`;
+
+    return fechaFormateada;
+  }
+
+  const handleDeleteAppointment = async () => {
+    if (selectedAppointment) {
+      try {
+        await appointmentServices.deleteAppointment(selectedAppointment._id, '');
+        const updatedAppointments = appointments.filter((appointment) => appointment._id !== selectedAppointment._id);
+
+        setAppointments(updatedAppointments);
+        clearInputFields();
+        closeModal();
+        setAction('ELIMINADA');
+        setSuccessOpen(true);
+        setSuccessMessage('Reseña eliminada correctamente');
+        setConfirmOpen(false); // Aquí se cierra la modal de confirmación después de eliminar la reseña
+      } catch (error) {
+        console.error('Error al eliminar reseña:', error);
+      }
+    }
+  };
+
+  const closeModal = () => {
+    clearInputFields();
+    setModalOpen(false);
+    setSuccessOpen(false);
+  };
+
+  const clearInputFields = () => {
+    setTelephone('');
+    setIdService('');
+    setFullName('https://bucket-harmony.s3.amazonaws.com/defualt2.png');
+    setSelectedAppointment(null);
+  };
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const normalizeString = (str: string | undefined) => {
+    return str?.normalize('NFD').replace(/[\u0300-\u036f]/g, '') || '';
+  };
+
+  const filteredAppointments = appointments.filter((appointment) =>
+    normalizeString(appointment.date).toLowerCase().includes(normalizeString(searchTerm).toLowerCase())
+  );
+
+  return (
+    <Container component="main" maxWidth="md">
+      <Backdrop open={updating}>
+        <CircularProgress color="inherit" />
+      </Backdrop>{' '}
+      {/* Mostrar el fondo oscuro mientras loading sea true */}
+      <br />
+      <br />
+      {successMessage && (
+        <Stack sx={{ width: '100%' }} spacing={2}>
+          <Alert
+            severity="success"
+            onClose={() => {
+              setSuccessMessage('');
+            }}
+          >
+            <AlertTitle>{action}</AlertTitle>
+            {successMessage}
+          </Alert>
+        </Stack>
+      )}
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <Typography variant="h3" align="justify" style={{ flexGrow: 1 }}>
+          CITAS DE {new Date().toLocaleString('default', { month: 'long' }).toUpperCase()}
+        </Typography>
+        <Tooltip title="Revisar fechas disponibles">
+          <Button onClick={() => openModal('', null)} variant="contained" color="success">
+            Disponibles
+          </Button>
+        </Tooltip>
+      </div>
+      <Tooltip title="Buscar por fecha">
+        <TextField
+          label="Buscar"
+          variant="outlined"
+          margin="normal"
+          value={searchTerm}
+          onChange={handleSearchChange}
+          fullWidth
+        />
+      </Tooltip>
+      <br />
+      <br />
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead style={{ backgroundColor: '#f0f0f0' }}>
+            <TableRow>
+              <TableCell style={{ fontWeight: 700 }}>PACIENTE</TableCell>
+              <TableCell style={{ fontWeight: 700 }}>TELÉFONO</TableCell>
+              <TableCell style={{ fontWeight: 700 }}>FECHA</TableCell>
+              <TableCell style={{ fontWeight: 700 }}>HORA</TableCell>
+              <TableCell style={{ fontWeight: 700 }}>SERVICIO</TableCell>
+              <TableCell style={{ fontWeight: 700 }}>ESTATUS</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredAppointments
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((appointment) => (
+                <TableRow
+                  key={appointment._id}
+                  onClick={() => openModal(appointment._id, appointment)}
+                  style={{ cursor: 'pointer' }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f5f5f5')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'inherit')}
+                >
+                  <TableCell>{appointment.fullName}</TableCell>
+                  <TableCell>{appointment.telephone}</TableCell>
+                  <TableCell>{formatearFecha(appointment.date)}</TableCell>
+                  <TableCell>{appointment.hour}</TableCell>
+                  <TableCell>{appointment.service}</TableCell>
+                  <TableCell>{appointment.status}</TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <TablePagination
+        rowsPerPageOptions={[5, 10, 25]}
+        component="div"
+        count={filteredAppointments.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
+      <Dialog open={modalOpen} onClose={closeModal}>
+  <DialogTitle>{selectedAppointment ? 'Editar Registro' : 'Agregar Registro'}</DialogTitle>
+  <DialogContent>
+  {!selectedAppointment ? (
+    <div>
+      <Typography variant="h5" gutterBottom>
+        Horarios Disponibles
+      </Typography>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        {/* Renderizar horarios en dos columnas */}
+        <div style={{ flex: '50%' }}>
+          {availableHours.slice(0, Math.ceil(availableHours.length / 2)).map((hour) => (
+            <Typography key={hour}>{hour}</Typography>
+          ))}
+        </div>
+        <div style={{ flex: '50%' }}>
+          {availableHours.slice(Math.ceil(availableHours.length / 2)).map((hour) => (
+            <Typography key={hour}>{hour}</Typography>
+          ))}
+        </div>
+      </div>
+    </div>
+  ) : (
+    <>
+      {/* Aquí van los campos de edición si hay una cita seleccionada */}
+      {/* ... */}
+    </>
+  )}
+</DialogContent>
+
+  <DialogActions>
+    {selectedAppointment && (
+      <Button onClick={() => setConfirmOpen(true)} variant="contained" color="error">
+        Eliminar
+      </Button>
+    )}
+    <Button onClick={closeModal} variant="outlined" color="primary">
+      Cancelar
+    </Button>
+    <Button
+      onClick={selectedAppointment ? handleUpdateAppointment : handleAddAppointment}
+      variant="contained"
+      color="primary"
+      disabled={!fullName || !telephone || !date || !hour || !idService || !status}
+    >
+      {selectedAppointment ? 'Actualizar' : 'Agregar'}
+    </Button>
+  </DialogActions>
+</Dialog>
+
+      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
+        <DialogTitle>Confirmar Eliminación</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">¿Está seguro de que desea eliminar esta reseña?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmOpen(false)} variant="outlined" color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={handleDeleteAppointment} variant="contained" color="error">
+            Eliminar
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Button onClick={() => openModal('', null)} variant="contained" color="primary">
+        Agregar Registro
+      </Button>
+    </Container>
+  );
+};
+
+export default AppointmentList;
+
+
+
+*******************
+// import React, { useState, useEffect } from 'react';
+// import DeleteIcon from '@mui/icons-material/Delete';
+
+// import {
+//   Table,
+//   TableBody,
+//   TableCell,
+//   TableContainer,
+//   TableHead,
+//   TableRow,
+//   Paper,
+//   TextField,
+//   Button,
+//   Dialog,
+//   DialogTitle,
+//   DialogContent,
+//   DialogActions,
+//   Typography,
+//   Container,
+//   Select,
+//   MenuItem,
+//   FormControl,
+//   InputLabel,
+//   RadioGroup,
+//   Radio,
+//   FormControlLabel,
+//   IconButton,
+//   CircularProgress,
+//   Backdrop,
+//   Snackbar,
+//   Alert,
+//   FormLabel,
+//   Box,
+// } from '@mui/material';
+// import { appointmentServices } from '../../../services/appointments/appointments';
+// import { Appointments, CreateAppointments } from '../../types/appointments';
+
+// const AppointmentList: React.FC = () => {
+//   const [appointments, setAppointments] = useState<Appointments[]>([]);
+//   const [filteredAppointments, setFilteredAppointments] = useState<Appointments[]>([]);
+//   const [modalOpen, setModalOpen] = useState(false);
+//   const [confirmOpen, setConfirmOpen] = useState(false);
+//   const [loading, setLoading] = useState(false);
+//   const [updating, setUpdating] = useState(false);
+//   const [selectedAppointment, setSelectedAppointment] = useState<Appointments | null>(null);
+//   const [searchTerm, setSearchTerm] = useState<string>('');
+//   const [successMessage, setSuccessMessage] = useState<string>('');
+//   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+//   const [selectedFilterType, setSelectedFilterType] = useState<'day' | 'month'>('day');
+//   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
+//   const [fullname, setFullname] = useState('');
+//   const [service, setService] = useState('');
+//   const [phone, setPhone] = useState('');
+//   const [status, setStatus] = useState('');
+
+//   // Función para cargar las citas
+//   const fetchAppointments = async () => {
+//     try {
+//       setLoading(true);
+//       const fetchedAppointments = await appointmentServices.getAllAppointments('');
+//       setAppointments(fetchedAppointments);
+//       setFilteredAppointments(fetchedAppointments);
+//     } catch (error) {
+//       console.error('Error fetching appointments:', error);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchAppointments();
+//   }, []);
+
+//   useEffect(() => {
+//     filterAppointments();
+//   }, [selectedDate, selectedFilterType, appointments]);
+
+//   const filterAppointments = () => {
+//     if (!selectedDate) {
+//       setFilteredAppointments(appointments);
+//       return;
+//     }
+
+//     if (selectedFilterType === 'day') {
+//       const filtered = appointments.filter((appointment) => {
+//         const appointmentDate = new Date(appointment.date);
+//         return (
+//           appointmentDate.getDate() === selectedDate.getDate() &&
+//           appointmentDate.getMonth() === selectedDate.getMonth() &&
+//           appointmentDate.getFullYear() === selectedDate.getFullYear()
+//         );
+//       });
+//       setFilteredAppointments(filtered);
+//     } else if (selectedFilterType === 'month') {
+//       const filtered = appointments.filter((appointment) => {
+//         const appointmentDate = new Date(appointment.date);
+//         return (
+//           appointmentDate.getMonth() === selectedDate.getMonth() &&
+//           appointmentDate.getFullYear() === selectedDate.getFullYear()
+//         );
+//       });
+//       setFilteredAppointments(filtered);
+//     }
+//   };
+
+//   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+//     setSearchTerm(event.target.value);
+//   };
+
+//   const handleDateChange = (date: Date | null) => {
+//     setSelectedDate(date);
+//   };
+
+//   const handleFilterTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+//     setSelectedFilterType(event.target.value as 'day' | 'month');
+//   };
+
+//   const handleOpenModal = (appointment: Appointments | null = null) => {
+//     setSelectedAppointment(appointment);
+//     setModalOpen(true);
+//   };
+
+//   const handleCloseModal = () => {
+//     setSelectedAppointment(null);
+//     setModalOpen(false);
+//   };
+
+//   const handleSaveAppointment = async () => {
+//     try {
+//       setUpdating(true);
+//       if (selectedAppointment?._id) {
+//         await appointmentServices.updateById(selectedAppointment._id, selectedAppointment, '');
+//         setSuccessMessage('Cita actualizada correctamente.');
+//       } else {
+//         const newAppointment: CreateAppointments = {
+//           fullName: fullname,
+//           idService: service,
+//           telephone: phone,
+//           date: selectedDate!.toISOString(),
+//           hour: '09:00', // Supongamos que seleccionamos la primera hora disponible por defecto
+//           status: status,
+//         };
+//         await appointmentServices.createAppointment(newAppointment, '');
+//         setSuccessMessage('Cita creada correctamente.');
+//       }
+//       handleCloseModal();
+//       clearForm();
+//       fetchAppointments(); // Volver a cargar las citas para actualizar la tabla
+//     } catch (error) {
+//       console.error('Error saving appointment:', error);
+//     } finally {
+//       setUpdating(false);
+//     }
+//   };
+
+//   const handleDeleteAppointment = async () => {
+//     try {
+//       setUpdating(true);
+//       if (selectedAppointment?._id) {
+//         await appointmentServices.deleteAppointment(selectedAppointment._id, '');
+//         setSuccessMessage('Cita eliminada correctamente.');
+//         fetchAppointments(); // Volver a cargar las citas para actualizar la tabla
+//       }
+//     } catch (error) {
+//       console.error('Error deleting appointment:', error);
+//     } finally {
+//       setUpdating(false);
+//       setConfirmOpen(false);
+//     }
+//   };
+
+//   const handleRowClick = (appointment: Appointments) => {
+//     setSelectedAppointment(appointment);
+//     handleOpenModal(appointment);
+//   };
+
+//   const handleAvailableTimes = () => {
+//     const takenTimes = filteredAppointments
+//       .filter((appointment) => {
+//         const appointmentDate = new Date(appointment.date);
+//         return (
+//           appointmentDate.getDate() === selectedDate!.getDate() &&
+//           appointmentDate.getMonth() === selectedDate!.getMonth() &&
+//           appointmentDate.getFullYear() === selectedDate!.getFullYear()
+//         );
+//       })
+//       .map((appointment) => appointment.hour);
+
+//     const allTimes = generateTimes();
+//     const available = allTimes.filter((time) => !takenTimes.includes(time));
+//     setAvailableTimes(available);
+//   };
+
+//   const generateTimes = () => {
+//     const times = [];
+//     let currentDate = new Date();
+//     currentDate.setHours(8, 0, 0); // Empezar desde las 8:00 AM
+
+//     while (currentDate.getHours() < 18) {
+//       times.push(currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+//       currentDate.setMinutes(currentDate.getMinutes() + 30); // Añadir 30 minutos
+//     }
+//     return times;
+//   };
+
+//   const clearForm = () => {
+//     setFullname('');
+//     setService('');
+//     setPhone('');
+//     setStatus('');
+//   };
+
+//   return (
+//     <Container maxWidth="lg">
+//       {/* Filtros y botón Agregar Cita */}
+//       <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+//         <TextField
+//           type="date"
+//           label="Seleccionar Fecha"
+//           InputLabelProps={{
+//             shrink: true,
+//           }}
+//           value={selectedDate ? selectedDate.toISOString().split('T')[0] : ''}
+//           onChange={(e) => handleDateChange(new Date(e.target.value))}
+//           sx={{ mr: 2 }}
+//         />
+//         <FormControl component="fieldset">
+//           <FormLabel component="legend">Filtrar por:</FormLabel>
+//           <RadioGroup
+//             row
+//             aria-label="filter-type"
+//             name="filter-type"
+//             value={selectedFilterType}
+//             onChange={handleFilterTypeChange}
+//           >
+//             <FormControlLabel value="day" control={<Radio />} label="Día" />
+//             <FormControlLabel value="month" control={<Radio />} label="Mes" />
+//           </RadioGroup>
+//         </FormControl>
+//         <Button variant="contained" color="primary" onClick={handleAvailableTimes}>
+//           Disponibles
+//         </Button>
+//       </Box>
+
+//       {/* Tabla de Citas */}
+//       <TableContainer component={Paper}>
+//         <Table>
+//           <TableHead>
+//             <TableRow>
+//               <TableCell>Fecha</TableCell>
+//               <TableCell>Hora</TableCell>
+//               <TableCell>Nombre Paciente</TableCell>
+//               <TableCell>Acciones</TableCell>
+//             </TableRow>
+//           </TableHead>
+//           <TableBody>
+//             {loading ? (
+//               <TableRow>
+//                 <TableCell colSpan={4}>
+//                   <Backdrop open={true}>
+//                     <CircularProgress color="inherit" />
+//                   </Backdrop>
+//                 </TableCell>
+//               </TableRow>
+//             ) : filteredAppointments.length === 0 ? (
+//               <TableRow>
+//                 <TableCell colSpan={4}>No hay citas para mostrar.</TableCell>
+//               </TableRow>
+//             ) : (
+//               filteredAppointments.map((appointment) => (
+//                 <TableRow key={appointment._id} hover onClick={() => handleRowClick(appointment)}>
+//                   <TableCell>{new Date(appointment.date).toLocaleDateString()}</TableCell>
+//                   <TableCell>{appointment.hour}</TableCell>
+//                   <TableCell>{appointment.fullName}</TableCell>
+//                   <TableCell>
+//                     <IconButton aria-label="delete" onClick={(e) => handleDeleteAppointment()}>
+//                       <DeleteIcon />
+//                     </IconButton>
+//                   </TableCell>
+//                 </TableRow>
+//               ))
+//             )}
+//           </TableBody>
+//         </Table>
+//       </TableContainer>
+
+//       {/* Modal para Crear/Editar Cita */}
+//       <Dialog open={modalOpen} onClose={handleCloseModal}>
+//         <DialogTitle>{selectedAppointment ? 'Editar Cita' : 'Crear Nueva Cita'}</DialogTitle>
+//         <DialogContent>
+//           <TextField
+//             label="Nombre Completo"
+//             value={fullname}
+//             onChange={(e) => setFullname(e.target.value)}
+//             fullWidth
+//             margin="normal"
+//             variant="outlined"
+//           />
+//           <TextField
+//             label="Servicio"
+//             value={service}
+//             onChange={(e) => setService(e.target.value)}
+//             fullWidth
+//             margin="normal"
+//             variant="outlined"
+//           />
+//           <TextField
+//             label="Teléfono"
+//             value={phone}
+//             onChange={(e) => setPhone(e.target.value)}
+//             fullWidth
+//             margin="normal"
+//             variant="outlined"
+//           />
+//           <TextField
+//             label="Estado"
+//             value={status}
+//             onChange={(e) => setStatus(e.target.value)}
+//             fullWidth
+//             margin="normal"
+//             variant="outlined"
+//           />
+//         </DialogContent>
+//         <DialogActions>
+//           <Button onClick={handleCloseModal} color="primary">
+//             Cancelar
+//           </Button>
+//           <Button onClick={handleSaveAppointment} color="primary" variant="contained" disabled={updating}>
+//             {updating ? <CircularProgress size={24} /> : 'Guardar'}
+//           </Button>
+//         </DialogActions>
+//       </Dialog>
+
+//       {/* Snackbar para mensajes de éxito */}
+//       <Snackbar open={!!successMessage} autoHideDuration={6000} onClose={() => setSuccessMessage('')}>
+//         <Alert onClose={() => setSuccessMessage('')} severity="success">
+//           {successMessage}
+//         </Alert>
+//       </Snackbar>
+//     </Container>
+//   );
+// };
+
+// export default AppointmentList;

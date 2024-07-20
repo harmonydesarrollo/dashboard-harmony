@@ -33,15 +33,26 @@ import { specialtiesServices } from '../../../services/specialties/specialty';
 import { CreateUsers, UpdateUsers, Users } from '../../types/users';
 import { Specialties } from '../../types/specialties';
 import { awsServices } from '../../../services/aws/aws';
+// import { branchesServices } from '../../../services/branches/branches';
+import { Branches } from '../../types/branches';
+import { branchServices } from '../../../services/branches/branches';
+import MultiSelect from '../../molecules/MultiSelect';
+import MultiSelectBranches from '../../molecules/MultiSelect';
+import { rolServices } from '../../../services/roles/roles';
+import { Roles } from '../../types/roles';
 
 const UserList = () => {
+  const [selectedBranches, setSelectedBranches] = useState<string[]>([]);
+
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
   const [successOpen, setSuccessOpen] = useState<boolean>(false);
   const [action, setAction] = useState<string>('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [selectedSpecialty, setSelectedSpecialty] = useState<string>('');
+  
+  const [selectedBranch, setSelectedBranch] = useState<string>('');
+  const [selectedRol, setSelectedRol] = useState<string>('');
   const [users, setUsers] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<Users | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string>('');
@@ -51,17 +62,25 @@ const UserList = () => {
   const [gender, setGender] = useState<string>('');
   const [birthday, setBirthday] = useState<string>('');
   const [fullName, setFullName] = useState<string>('');
-  const [idSpecialty, setIdSpecialty] = useState<string>('');
+  
   const [idBranch, setIdBranch] = useState<string>('');
   const [idRol, setIdRol] = useState<string>('');
   const [photo, setPhoto] = useState<string>('');
   const [updatePhoto, setUpdatePhoto] = useState<string>('');
   const [createdAt, setCreatedAt] = useState<string>('');
   const [updatedAt, setUpdatedAt] = useState<string>('');
-  const [v, setV] = useState<number>(0);
-  const [specialty, setSpecialty] = useState<string>('');
+  const [v, setV] = useState<number>(0);  
+  
+  const [branch, setBranch] = useState<string>('');
+  const [rol, setRol] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string>('');
+  
+  
+  const [selectedSpecialty, setSelectedSpecialty] = useState<string>('');
+  const [idSpecialty, setIdSpecialty] = useState<string>('');
+  const [specialty, setSpecialty] = useState<string>('');
+  
 
   const closeSuccessMessage = () => {
     setTimeout(() => {
@@ -94,11 +113,33 @@ const UserList = () => {
         console.error('Error fetching specialties:', error);
       }
     };
+    // branches
+    const fetchBranches = async () => {
+      try {
+        const response = await branchServices.getAllBranches('');
+        setInitialBranches(response);
+      } catch (error) {
+        console.error('Error fetching specialties:', error);
+      }
+    };
+
+    const fetchRoles = async () => {
+      try {
+        const response = await rolServices.getAllRoles('');
+        setInitialRoles(response);
+      } catch (error) {
+        console.error('Error fetching roles:', error);
+      }
+    };
 
     fetchSpecialties();
+    fetchBranches();
+    fetchRoles();
   }, []);
 
   const [initialSpecialties, setInitialSpecialties] = useState<Specialties[]>([]);
+  const [initialBranches, setInitialBranches] = useState<Branches[]>([]);
+  const [initialRoles, setInitialRoles] = useState<Roles[]>([]);
 
   const openModal = (userId: string, user: Users | null = null) => {
     const selectedUserData = users.find((u) => u._id === userId);
@@ -117,7 +158,12 @@ const UserList = () => {
       setIdRol(selectedUserData.idRol);
       setPhoto(selectedUserData.photo);
       setSelectedSpecialty(selectedUserData.idSpecialty); // Establecer el valor por defecto del Select
+      setSelectedBranch(selectedUserData.idBranch)
+      setSelectedRol(selectedUserData.roles);
       setSpecialty(selectedUserData.specialty);
+      setBranch(selectedUserData.idBranch);
+      setRol(selectedUserData.rol);
+      
     } else {
       clearInputFields();
     }
@@ -125,6 +171,14 @@ const UserList = () => {
   };
 
   const handleAddUser = async () => {
+    // <h3>Valores seleccionados:</h3>
+    // <ul>
+    //   {selectedBranches.map((branch) => (
+    //     <li key={branch}>{branch}</li>
+    //   ))}
+    // </ul>
+    console.log({selectedBranches})
+    
     const newUser: CreateUsers = {
       firstName,
       lastName,
@@ -133,6 +187,8 @@ const UserList = () => {
       idSpecialty: selectedSpecialty,
       photo: '', // Omitimos la foto aquí ya que la enviaremos por separado
       specialty,
+      idBranch: selectedBranch,
+      idRol: selectedRol,
     };
     const fileInput = document.getElementById('fileInput') as HTMLInputElement;
     if (fileInput && fileInput.files && fileInput.files[0]) {
@@ -185,18 +241,19 @@ const UserList = () => {
     }
 
     if (selectedUser) {
+      console.log({selectedRol});
       const updateUser: UpdateUsers = {
         _id: selectedUser._id,
         gender,
         birthday,
-        idBranch,
-        idRol,
+        idRol: selectedRol,
         firstName,
         lastName,
         middleName,
         fullName: `${firstName} ${lastName} ${middleName}`,
         idSpecialty: selectedSpecialty,
         photo: auxPhoto,
+        idBranch: selectedBranch
       };
 
       // jms
@@ -213,8 +270,8 @@ const UserList = () => {
               birthday,
               fullName: `${firstName} ${lastName} ${middleName}`,
               idSpecialty: selectedSpecialty,
-              idBranch,
-              idRol,
+              idBranch: selectedBranch,
+              idRol: selectedRol,
               photo,
               createdAt,
               updatedAt,
@@ -280,8 +337,12 @@ const UserList = () => {
     setUpdatedAt('');
     setV(0);
     setSpecialty('');
+    setBranch('');
+    setRol('');
     setSelectedUser(null);
     setSelectedSpecialty('');
+    setSelectedBranch('');
+    setSelectedRol('');
   };
 
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -304,6 +365,17 @@ const UserList = () => {
   const filteredUsers = users.filter((user) =>
     normalizeString(user.fullName).toLowerCase().includes(normalizeString(searchTerm).toLowerCase())
   );
+
+  
+
+  const handleSelectedBranchesChange = (selected: string[]) => {
+    setSelectedBranches(selected);
+  };
+
+  const handleBranchesChange = (selected: string[]) => {
+    setSelectedBranches(selected);
+  };
+
 
   return (
     <Container component="main" maxWidth="md">
@@ -398,6 +470,7 @@ const UserList = () => {
                   fullWidth
                 />
               </Box>
+
               <Box>
                 <FormControl fullWidth>
                   <Select
@@ -419,6 +492,30 @@ const UserList = () => {
                   <FormHelperText>Seleccione una especialidad</FormHelperText>
                 </FormControl>
               </Box>
+
+
+              <Box>
+                <FormControl fullWidth>
+                  <Select
+                    value={selectedBranch}
+                    onChange={(e) => {
+                      const selectedBranchId = e.target.value as string;
+                      const selectedBranchName =
+                      initialBranches.find((branch) => branch._id === selectedBranch)?._id || '';
+                      setSelectedBranch(selectedBranchId);
+                      setBranch(selectedBranchName); // Establecer el nombre de la especialidad en el estado specialty
+                    }}
+                  >
+                    {initialBranches.map((specialty) => (
+                      <MenuItem key={specialty._id} value={specialty._id}>
+                        {specialty.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  <FormHelperText>Seleccione una sucursal</FormHelperText>
+                </FormControl>
+              </Box>
+              
             </Box>
 
             {/* Columna 2 */}
@@ -464,6 +561,28 @@ const UserList = () => {
                   </label>
                 </Box>
               </Tooltip>
+              {/* <MultiSelectBranches onChange={handleBranchesChange} /> */}
+              <Box>
+                <FormControl fullWidth>
+                  <Select
+                    value={selectedRol}
+                    onChange={(e) => {
+                      const selectedRolId = e.target.value as string;
+                      const selectedRolName =
+                      initialRoles.find((branch) => branch._id === selectedRol)?._id || '';
+                      setSelectedRol(selectedRolId);
+                      setRol(selectedRolName); // Establecer el nombre de la especialidad en el estado specialty
+                    }}
+                  >
+                    {initialRoles.map((rol) => (
+                      <MenuItem key={rol._id} value={rol._id}>
+                        {rol.type}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  <FormHelperText>Seleccione un rol</FormHelperText>
+                </FormControl>
+              </Box>
             </Box>
           </Box>
 
@@ -481,7 +600,7 @@ const UserList = () => {
                   }}
                   variant="contained"
                   color="primary"
-                  disabled={!firstName || !lastName || !selectedSpecialty}
+                  disabled={!firstName || !lastName || !selectedSpecialty || !selectedBranch}
                 >
                   Actualizar
                 </Button>
@@ -504,7 +623,7 @@ const UserList = () => {
                 }}
                 variant="contained"
                 color="primary"
-                disabled={!firstName || !lastName || !middleName || !selectedSpecialty}
+                disabled={!firstName || !lastName || !middleName || !selectedSpecialty || !selectedBranch}
               >
                 Agregar
               </Button>

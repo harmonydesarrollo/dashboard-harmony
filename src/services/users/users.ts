@@ -1,6 +1,28 @@
 import { CreateUsers, UpdateUsers, Users } from '../../components/types/users';
 import HarmonyApi from '../config';
+// /users/login
+async function login(data: CreateUsers, token: string): Promise<any> {
+  try {
+    const modifiedUserInfo = { ...data };
+    // Asegúrate de que photo pueda ser un objeto o undefined
+    if (typeof modifiedUserInfo.photo === 'object' && modifiedUserInfo.photo !== null) {
+      const photoObject = modifiedUserInfo.photo as { fileUrl: string };
+      if (photoObject.fileUrl) {
+        modifiedUserInfo.photo = photoObject.fileUrl;
+      }
+    }
 
+    // console.log(JSON.stringify(modifiedUserInfo));
+    const response = await HarmonyApi.post<any>('users/', modifiedUserInfo, {
+      headers: { Authorization: 'Bearer ' + token },
+    });
+
+    // console.log(response);
+    return response.data;
+  } catch (e) {
+    throw new Error(JSON.stringify(e));
+  }
+}
 //https://develop.d2z36kd8bp7vmy.amplifyapp.com/employees - crear
 async function createUser(data: CreateUsers, token: string): Promise<any> {
   try {
@@ -13,12 +35,12 @@ async function createUser(data: CreateUsers, token: string): Promise<any> {
       }
     }
 
-    console.log(JSON.stringify(modifiedUserInfo));
+    // console.log(JSON.stringify(modifiedUserInfo));
     const response = await HarmonyApi.post<any>('users/', modifiedUserInfo, {
       headers: { Authorization: 'Bearer ' + token },
     });
 
-    console.log(response);
+    // console.log(response);
     return response.data;
   } catch (e) {
     throw new Error(JSON.stringify(e));
@@ -50,6 +72,7 @@ async function getAllUsers(idCompany: string, token: string, page: number, perPa
       headers: { Authorization: 'Bearer ' + token },
     });
 
+    // console.log({response})
     const formattedData = response.data.map((item: any) => ({
       user: {
         _id: item.user._id,
@@ -64,9 +87,11 @@ async function getAllUsers(idCompany: string, token: string, page: number, perPa
         idRol: item.user.idRol,
         photo: item.user.photo,
         specialty: item.specialtyName,
+        username: item.user.username,
+        password: item.user.password
       },
     }));
-    // console.log(JSON.stringify(formattedData));
+    // console.log({formattedData});
     const transformedResponse = formattedData.map((item: { user: any }) => item.user);
 
     return transformedResponse;

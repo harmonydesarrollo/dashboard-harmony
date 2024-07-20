@@ -21,8 +21,6 @@ import {
   Stack,
   TablePagination,
   Box,
-  Backdrop,
-  CircularProgress,
 } from '@mui/material';
 
 import { reviewServices } from '../../../services/reviews/reviews';
@@ -44,9 +42,6 @@ const ReviewList = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [updatePhoto, setUpdatePhoto] = useState<boolean>(false);
-
-  const [loading, setLoading] = useState(false);
-  const [updating, setUpdating] = useState(false);
 
   const closeSuccessMessage = () => {
     setTimeout(() => {
@@ -108,7 +103,7 @@ const ReviewList = () => {
       setAction('AGREGADA');
       setSuccessOpen(true);
       setSuccessMessage('Reseña agregada correctamente');
-      // setConfirmOpen(true); // Aquí se cierra la modal de confirmación después de eliminar la reseña
+      setConfirmOpen(true); // Aquí se cierra la modal de confirmación después de eliminar la reseña
     } catch (error) {
       console.error('Error al agregar reseña:', error);
     }
@@ -116,8 +111,6 @@ const ReviewList = () => {
 
   const handleUpdateReview = async () => {
     if (selectedReview) {
-      setUpdating(true); // Mostrar fondo oscuro y el indicador de carga
-
       const updatedReview: UpdateReviews = {
         _id: selectedReview._id,
         img,
@@ -146,7 +139,6 @@ const ReviewList = () => {
         setAction('ACTUALIZADA');
         setSuccessOpen(true);
         setSuccessMessage('Reseña actualizada correctamente');
-        setUpdating(false); // Ocultar fondo oscuro y el indicador de carga después de completar la actualización
         setConfirmOpen(false); // Aquí se cierra la modal de confirmación después de eliminar la reseña
       } catch (error) {
         console.error('Error al actualizar reseña:', error);
@@ -209,10 +201,6 @@ const ReviewList = () => {
 
   return (
     <Container component="main" maxWidth="md">
-      <Backdrop open={updating}>
-        <CircularProgress color="inherit" />
-      </Backdrop>{' '}
-      {/* Mostrar el fondo oscuro mientras loading sea true */}
       <br />
       <br />
       {successMessage && (
@@ -231,7 +219,8 @@ const ReviewList = () => {
       <Typography variant="h3" align="justify">
         LISTADO DE RESEÑAS
       </Typography>
-      <Tooltip title="Buscar por nombre">
+
+      <Tooltip title="Buscar por título">
         <TextField
           label="Buscar"
           variant="outlined"
@@ -280,8 +269,9 @@ const ReviewList = () => {
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
+
       <Dialog open={modalOpen} onClose={closeModal}>
-        <DialogTitle>{selectedReview ? 'Editar Reseña' : 'Agregar Reseña'}</DialogTitle>
+        <DialogTitle>{selectedReview ? 'Editar Reseña' : 'Agregar Nueva Reseña'}</DialogTitle>
         <DialogContent>
           <TextField
             margin="normal"

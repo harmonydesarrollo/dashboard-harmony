@@ -26,8 +26,8 @@ import {
 } from '@mui/material';
 
 import { reviewServices } from '../../../services/reviews/reviews';
+import { CreateReviews, Reviews, UpdateReviews } from '../../types/reviews';
 import { awsServices } from '../../../services/aws/aws'; // Importar awsServices
-import { Reviews, UpdateReviews, CreateReviews } from '../../types/reviews';
 
 const ReviewList = () => {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -37,7 +37,7 @@ const ReviewList = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [reviews, setReviews] = useState<Reviews[]>([]);
-  const [selectedReview, setSelectedReview] = useState<Reviews>();
+  const [selectedReview, setSelectedReview] = useState<Reviews | null>(null);
   const [img, setImg] = useState<string>('');
   const [title, setTitle] = useState<string>('');
   const [description, setDescription] = useState<string>('');
@@ -73,7 +73,6 @@ const ReviewList = () => {
   const openModal = (reviewId: string, review: Reviews | null = null) => {
     const selectedReviewData = reviews.find((r) => r._id === reviewId);
 
-    console.log(selectedReviewData?.img);
     if (selectedReviewData) {
       setSelectedReview(selectedReviewData);
       setTitle(selectedReviewData.title);
@@ -106,9 +105,9 @@ const ReviewList = () => {
       setReviews(updatedReviews);
       clearInputFields();
       closeModal();
-      setAction('¡AGREGADO EXITOSAMENTE!');
+      setAction('AGREGADA');
       setSuccessOpen(true);
-      setSuccessMessage('Se ha dado de alta correctamente.');
+      setSuccessMessage('Reseña agregada correctamente');
       // setConfirmOpen(true); // Aquí se cierra la modal de confirmación después de eliminar la reseña
     } catch (error) {
       console.error('Error al agregar reseña:', error);
@@ -116,42 +115,43 @@ const ReviewList = () => {
   };
 
   const handleUpdateReview = async () => {
-    let auxImg = img;
-    console.log({ selectedReview: selectedReview });
-    console.log({ img });
-    const updatedReview: UpdateReviews = {
-      img,
-      title,
-      description,
-    };
-    if (img.includes('bucket-harmony')) {
-      console.log('es la misma imagen');
-    } else {
-      console.log('ya busco nuna nueva');
-      const fileInput = document.getElementById('fileInput') as HTMLInputElement;
-      if (fileInput && fileInput.files && fileInput.files[0]) {
-        const file = fileInput.files[0];
-        console.log('entro aqui: ');
-        console.log({ file });
-        const photoUrl: any = await awsServices.insertImgInS3(file, '');
-        console.log(photoUrl);
-        auxImg = decodeURIComponent(photoUrl.fileUrl); // Actualizar URL de imagen en la reseña
+    if (selectedReview) {
+      setUpdating(true); // Mostrar fondo oscuro y el indicador de carga
+
+      const updatedReview: UpdateReviews = {
+        _id: selectedReview._id,
+        img,
+        title,
+        description,
+      };
+
+      try {
+        if (updatePhoto) {
+          const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+          if (fileInput && fileInput.files && fileInput.files[0]) {
+            const file = fileInput.files[0];
+            const photoUrl: any = await awsServices.insertImgInS3(file, '');
+            updatedReview.img = decodeURIComponent(photoUrl.fileUrl); // Actualizar URL de imagen en la reseña
+          }
+        }
+
+        await reviewServices.updateById(selectedReview._id, updatedReview, ''); // Actualizar la reseña en el backend
+        const updatedReviews = reviews.map((review) =>
+          review._id === selectedReview._id ? { ...review, img, title, description } : review
+        );
+
+        setReviews(updatedReviews);
+        clearInputFields();
+        closeModal();
+        setAction('ACTUALIZADA');
+        setSuccessOpen(true);
+        setSuccessMessage('Reseña actualizada correctamente');
+        setUpdating(false); // Ocultar fondo oscuro y el indicador de carga después de completar la actualización
+        setConfirmOpen(false); // Aquí se cierra la modal de confirmación después de eliminar la reseña
+      } catch (error) {
+        console.error('Error al actualizar reseña:', error);
       }
     }
-    updatedReview.img = auxImg;
-    console.log(updatedReview);
-    await reviewServices.updateById(selectedReview!._id, updatedReview, ''); // Actualizar la reseña en el backend
-    const updatedReviews = reviews.map((review) =>
-      review._id === selectedReview!._id ? { ...review, img: auxImg, title, description } : review
-    );
-    setReviews(updatedReviews);
-    clearInputFields();
-    closeModal();
-    setAction('¡ACTUALIZACIÓN ÉXITOSA!');
-    setSuccessOpen(true);
-    setSuccessMessage('Reseña actualizada: ' + title);
-    setUpdating(false); // Ocultar fondo oscuro y el indicador de carga después de completar la actualización
-    setConfirmOpen(false); // Aquí se cierra la modal de confirmación después de eliminar la reseña
   };
 
   const handleDeleteReview = async () => {
@@ -163,9 +163,9 @@ const ReviewList = () => {
         setReviews(updatedReviews);
         clearInputFields();
         closeModal();
-        setAction('ELIMINACIÓN ÉXITOSA!');
+        setAction('ELIMINADA');
         setSuccessOpen(true);
-        setSuccessMessage('Reseña eliminada: ' + title);
+        setSuccessMessage('Reseña eliminada correctamente');
         setConfirmOpen(false); // Aquí se cierra la modal de confirmación después de eliminar la reseña
       } catch (error) {
         console.error('Error al eliminar reseña:', error);
@@ -183,7 +183,7 @@ const ReviewList = () => {
     setTitle('');
     setDescription('');
     setImg('https://bucket-harmony.s3.amazonaws.com/defualt2.png');
-    setSelectedReview(undefined);
+    setSelectedReview(null);
   };
 
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -247,9 +247,9 @@ const ReviewList = () => {
         <Table>
           <TableHead style={{ backgroundColor: '#f0f0f0' }}>
             <TableRow>
-              <TableCell style={{ fontWeight: 700 }}>NOMBRE</TableCell>
-              <TableCell style={{ fontWeight: 700 }}>DESCRIPCIÓN</TableCell>
-              <TableCell style={{ fontWeight: 700 }}>FOTO</TableCell>
+              <TableCell style={{ fontWeight: 700 }}>NOMBRE COMPLETO</TableCell>
+              <TableCell style={{ fontWeight: 700 }}>COMENTARIOS</TableCell>
+              <TableCell style={{ fontWeight: 700 }}>FOTO DEL PACIENTE</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -264,7 +264,7 @@ const ReviewList = () => {
                 <TableCell>{review.title}</TableCell>
                 <TableCell>{review.description}</TableCell>
                 <TableCell>
-                  <img src={review.img} alt="Review" style={{ width: '100px', height: '100px' }} />
+                  <img src={review.img} alt="Review" style={{ width: '100px', height: '100px', borderRadius: '50%' }} />
                 </TableCell>
               </TableRow>
             ))}
@@ -280,19 +280,12 @@ const ReviewList = () => {
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
-      <Dialog
-        open={modalOpen}
-        onClose={(event, reason) => {
-          if (reason !== 'backdropClick') {
-            closeModal();
-          }
-        }}
-      >
+      <Dialog open={modalOpen} onClose={closeModal}>
         <DialogTitle>{selectedReview ? 'Editar Reseña' : 'Agregar Reseña'}</DialogTitle>
         <DialogContent>
           <TextField
             margin="normal"
-            label="Nombre"
+            label="Nombre completo"
             variant="outlined"
             fullWidth
             value={title}
@@ -300,7 +293,7 @@ const ReviewList = () => {
           />
           <TextField
             margin="normal"
-            label="Comentario"
+            label="Comentarios"
             variant="outlined"
             fullWidth
             multiline
@@ -339,7 +332,7 @@ const ReviewList = () => {
                     height: '130px',
                     cursor: 'pointer',
                     objectFit: 'fill',
-                    // borderRadius: '50%',
+                    borderRadius: '50%',
                   }}
                 />
               </label>
@@ -381,7 +374,7 @@ const ReviewList = () => {
         </DialogActions>
       </Dialog>
       <Button onClick={() => openModal('', null)} variant="contained" color="primary">
-        NUEVO
+        Agregar Reseña
       </Button>
     </Container>
   );

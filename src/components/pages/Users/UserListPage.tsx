@@ -33,6 +33,11 @@ import { specialtiesServices } from '../../../services/specialties/specialty';
 import { CreateUsers, UpdateUsers, Users } from '../../types/users';
 import { Specialties } from '../../types/specialties';
 import { awsServices } from '../../../services/aws/aws';
+// import { branchesServices } from '../../../services/branches/branches';
+import { Branches } from '../../types/branches';
+import { branchServices } from '../../../services/branches/branches';
+import { rolServices } from '../../../services/roles/roles';
+import { Roles } from '../../types/roles';
 
 const UserList = () => {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -42,10 +47,13 @@ const UserList = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>('');
+  const [selectedBranch, setSelectedBranch] = useState<string>('');
+  const [selectedRolAux, setSelectedRolAux] = useState<string>('');
   const [users, setUsers] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<Users | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string>('');
   const [firstName, setFirstName] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
   const [lastName, setLastName] = useState<string>('');
   const [middleName, setMiddleName] = useState<string>('');
   const [gender, setGender] = useState<string>('');
@@ -58,15 +66,17 @@ const UserList = () => {
   const [updatePhoto, setUpdatePhoto] = useState<string>('');
   const [createdAt, setCreatedAt] = useState<string>('');
   const [updatedAt, setUpdatedAt] = useState<string>('');
-  const [v, setV] = useState<number>(0);
+  const [v, setV] = useState<number>(0);  
   const [specialty, setSpecialty] = useState<string>('');
+  const [branch, setBranch] = useState<string>('');
+  const [rolAux, setRolAux] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string>('');
 
   const closeSuccessMessage = () => {
     setTimeout(() => {
       setSuccessMessage('');
-    }, 5000); // 10000 milisegundos = 10 segundos
+    }, 10000); // 10000 milisegundos = 10 segundos
   };
 
   useEffect(() => {
@@ -94,16 +104,41 @@ const UserList = () => {
         console.error('Error fetching specialties:', error);
       }
     };
+    // branches
+    const fetchBranches = async () => {
+      try {
+        const response = await branchServices.getAllBranches('');
+        setInitialBranches(response);
+      } catch (error) {
+        console.error('Error fetching specialties:', error);
+      }
+    };
+
+    const fetchRolesAux = async () => {
+      try {
+        const response = await rolServices.getAllRoles('');
+        // console.log(response)
+        setInitialRolesAux(response);
+      } catch (error) {
+        console.error('Error fetching specialties:', error);
+      }
+    };
 
     fetchSpecialties();
+    fetchBranches();
+    fetchRolesAux();
   }, []);
 
   const [initialSpecialties, setInitialSpecialties] = useState<Specialties[]>([]);
+  const [initialBranches, setInitialBranches] = useState<Branches[]>([]);
+  const [initialRolesAux, setInitialRolesAux] = useState<Roles[]>([]);
 
   const openModal = (userId: string, user: Users | null = null) => {
+    // console.log({users})
     const selectedUserData = users.find((u) => u._id === userId);
 
     if (selectedUserData) {
+      // console.log({selectedUserData})
       setSelectedUser(selectedUserData);
       setSelectedUserId(userId);
       setFirstName(selectedUserData.firstName);
@@ -117,7 +152,13 @@ const UserList = () => {
       setIdRol(selectedUserData.idRol);
       setPhoto(selectedUserData.photo);
       setSelectedSpecialty(selectedUserData.idSpecialty); // Establecer el valor por defecto del Select
+      setSelectedBranch(selectedUserData.idBranch)
+      setSelectedRolAux(selectedUserData.idRol)
       setSpecialty(selectedUserData.specialty);
+      setBranch(selectedUserData.idBranch);
+      setRolAux(selectedUserData.rol);
+      setPassword(selectedUserData.password)
+      
     } else {
       clearInputFields();
     }
@@ -125,6 +166,10 @@ const UserList = () => {
   };
 
   const handleAddUser = async () => {
+    // console.log({rolAux})
+    // console.log({idRol})
+    
+    
     const newUser: CreateUsers = {
       firstName,
       lastName,
@@ -133,7 +178,12 @@ const UserList = () => {
       idSpecialty: selectedSpecialty,
       photo: '', // Omitimos la foto aquí ya que la enviaremos por separado
       specialty,
+      idBranch: selectedBranch,
+      idRol: selectedRolAux,
+      username:rolAux,
+      password:password,
     };
+    // console.log({rolAux})
     const fileInput = document.getElementById('fileInput') as HTMLInputElement;
     if (fileInput && fileInput.files && fileInput.files[0]) {
       const file = fileInput.files[0];
@@ -148,7 +198,7 @@ const UserList = () => {
         console.error('Error al agregar usuario:', error);
       }
     } else {
-      newUser.photo = 'https://bucket-harmony.s3.amazonaws.com/defualt2.png';
+      newUser.photo = 'https://harmony-web.s3.amazonaws.com/logo.jpg';
     }
     // Crear el usuario con la foto y los demás datos
     await userServices.createUser(newUser, '');
@@ -166,9 +216,19 @@ const UserList = () => {
     closeModal();
 
     // Mostrar ventana modal de éxito
-    setAction('AGREGADO EXITOSAMENTE!!!');
-    setSuccessOpen(true);
-    setSuccessMessage('Usuario registrado.');
+    setAction('AGREGADO');
+    setSuccessOpen(true); // Mostrar el diálogo de éxito
+    setSuccessMessage(`Usuario agregado correctamente`);
+  };
+
+  const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    const selectedRoleId = event.target.value as string;
+    const selectedRole = initialRolesAux.find((rol) => rol._id === selectedRoleId);
+
+    if (selectedRole) {
+      setSelectedRolAux(selectedRoleId);
+      setRolAux(selectedRole.type); // Guardar el nombre del rol en la variable rolAux
+    }
   };
 
   const handleUpdateUser = async () => {
@@ -185,18 +245,22 @@ const UserList = () => {
     }
 
     if (selectedUser) {
+      // console.log({auxPhoto})
       const updateUser: UpdateUsers = {
         _id: selectedUser._id,
         gender,
         birthday,
-        idBranch,
-        idRol,
+
         firstName,
         lastName,
         middleName,
         fullName: `${firstName} ${lastName} ${middleName}`,
         idSpecialty: selectedSpecialty,
         photo: auxPhoto,
+        idBranch: selectedBranch,
+        idRol: selectedRolAux,
+        username: rolAux,
+        password: password
       };
 
       // jms
@@ -213,8 +277,8 @@ const UserList = () => {
               birthday,
               fullName: `${firstName} ${lastName} ${middleName}`,
               idSpecialty: selectedSpecialty,
-              idBranch,
-              idRol,
+              idBranch: selectedBranch,
+              idRol: selectedRolAux,
               photo,
               createdAt,
               updatedAt,
@@ -226,9 +290,9 @@ const UserList = () => {
       setUsers(updatedUsers);
       clearInputFields();
       closeModal();
-      setAction('SE ACTUALIZÓ EXITOSAMENTE!!!');
-      setSuccessOpen(true);
-      setSuccessMessage('Usuario actualizado: ' + firstName + ' ' + lastName + ' ' + middleName);
+      setAction('MODIFICADO');
+      setSuccessOpen(true); // Mostrar el diálogo de éxito
+      setSuccessMessage(`Usuario modificado correctamente`);
     }
   };
 
@@ -249,9 +313,9 @@ const UserList = () => {
         closeModal();
 
         // Mostrar ventana modal de éxito
-        setAction('SE ELIMINO EXITOSAMENTE!!!');
-        setSuccessOpen(true);
-        setSuccessMessage('Usuario eliminado: ' + fullName);
+        setAction('ELIMINADO');
+        setSuccessOpen(true); // Mostrar el diálogo de éxito
+        setSuccessMessage(`Usuario eliminado correctamente`);
       } catch (error) {
         console.error('Error al eliminar el usuario:', error);
       }
@@ -280,8 +344,13 @@ const UserList = () => {
     setUpdatedAt('');
     setV(0);
     setSpecialty('');
+    setBranch('');
+    setRolAux('');
     setSelectedUser(null);
     setSelectedSpecialty('');
+    setSelectedBranch('');
+    setSelectedRolAux('');
+    setPassword('');
   };
 
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -419,13 +488,34 @@ const UserList = () => {
                   <FormHelperText>Seleccione una especialidad</FormHelperText>
                 </FormControl>
               </Box>
+              <Box>
+                <FormControl fullWidth>
+                  <Select
+                    value={selectedBranch}
+                    onChange={(e) => {
+                      const selectedBranchId = e.target.value as string;
+                      const selectedBranchName =
+                      initialBranches.find((branch) => branch._id === selectedBranch)?._id || '';
+                      setSelectedBranch(selectedBranchId);
+                      setBranch(selectedBranchName); // Establecer el nombre de la especialidad en el estado specialty
+                    }}
+                  >
+                    {initialBranches.map((specialty) => (
+                      <MenuItem key={specialty._id} value={specialty._id}>
+                        {specialty.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  <FormHelperText>Seleccione una sucursal</FormHelperText>
+                </FormControl>
+              </Box>
             </Box>
 
             {/* Columna 2 */}
             <Box
               width="450px"
               height="270px"
-              marginTop="10px"
+              marginTop="46px"
               display="flex"
               flexDirection="column"
               justifyContent="center"
@@ -452,18 +542,47 @@ const UserList = () => {
                   />
                   <label htmlFor="fileInput">
                     <img
-                      src={photo || 'https://bucket-harmony.s3.amazonaws.com/defualt2.png'}
+                      src={photo || 'https://harmony-web.s3.amazonaws.com/logo.jpg'}
                       alt="Preview"
                       style={{
-                        width: '100%',
-                        height: '270px',
+                        width: '80%',
+                        height: '203px',
                         cursor: 'pointer',
                         objectFit: 'fill',
+                        borderRadius:'1vw'
                       }}
                     />
                   </label>
                 </Box>
               </Tooltip>
+              <Box>
+                <FormControl fullWidth >
+                  <Select
+                    value={selectedRolAux}
+                    onChange={(e) => {
+                      const selectedBranchId = e.target.value as string;
+                      const selectedBranch = initialRolesAux.find((branch) => branch._id === selectedBranchId);
+
+                      const selectedBranchName = selectedBranch ? selectedBranch.type : '';
+
+                      console.log(selectedBranchName, selectedBranchId)
+                      
+                      setSelectedRolAux(selectedBranchId);
+                      setRolAux(selectedBranchName); 
+                    }}
+                  >
+                    {initialRolesAux.map((rol) => (
+                      <MenuItem key={rol._id} value={rol._id}>
+                        {rol.type}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  <FormHelperText>Seleccione un rol</FormHelperText>
+                </FormControl>
+              </Box>
+              <Box mb={2}>
+                <TextField label="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} fullWidth />
+              </Box>
             </Box>
           </Box>
 
@@ -481,7 +600,7 @@ const UserList = () => {
                   }}
                   variant="contained"
                   color="primary"
-                  disabled={!firstName || !lastName || !selectedSpecialty}
+                  disabled={!firstName || !lastName || !selectedSpecialty || !selectedBranch}
                 >
                   Actualizar
                 </Button>
@@ -504,7 +623,7 @@ const UserList = () => {
                 }}
                 variant="contained"
                 color="primary"
-                disabled={!firstName || !lastName || !middleName || !selectedSpecialty}
+                disabled={!firstName || !lastName || !middleName || !selectedSpecialty || !selectedBranch}
               >
                 Agregar
               </Button>

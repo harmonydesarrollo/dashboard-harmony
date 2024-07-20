@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// prod-baushell
-const URL_BASE = 'https://harmony-production-ff6ebeae2992.herokuapp.com/';
+// const URL_BASE = process.env.API_URL_BASE;
+const URL_BASE = 'https://harmony-dev-mob-58cd4e713b6a.herokuapp.com/';
 
 const HarmonyApi = axios.create({
   baseURL: URL_BASE,

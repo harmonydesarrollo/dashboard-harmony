@@ -33,7 +33,7 @@ interface RegistrationFormProps {
 
 const RegistrationForm: React.FC<RegistrationFormProps> = ({ employeeData, onSave, onCancel }) => {
   const navigate = useNavigate();
-
+// console.log({employeeData})
   // Inicializamos el estado del formulario con los datos proporcionados
   const [formData, setFormData] = useState({
     firstName: employeeData ? employeeData[1] : '',
@@ -41,6 +41,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ employeeData, onSav
     middleName: employeeData ? employeeData[3] : '',
     specialty: employeeData ? employeeData[4] : '',
     photo: employeeData ? employeeData[7] : '',
+    
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>) => {

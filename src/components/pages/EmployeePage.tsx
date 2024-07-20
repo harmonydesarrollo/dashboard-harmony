@@ -13,7 +13,7 @@ const EmployeePage = () => {
   // Función de manejo de clic de fila
   const handleRowClick = (rowData: any) => {
     // Aquí puedes realizar acciones con los datos de la fila, como mostrarlos en un modal
-    console.log('Fila clickeada:', rowData);
+    // console.log('Fila clickeada:', rowData);
   };
 
   return (

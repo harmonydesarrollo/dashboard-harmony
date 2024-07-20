@@ -1,0 +1,158 @@
+// // App.tsx
+// import React from 'react';
+// import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+// import LoginPage from './components/organisms/LoginPage';
+// import HomePage from './components/pages/HomePage';
+// import FluidTemplate from './components/templates/FluidTemplate';
+
+// const App: React.FC = () => {
+//   return (
+//     <Router>
+//       <Routes>
+//         <Route path="/" element={<LoginPage />} />
+//         <Route
+//           path="/home"
+//           element={
+//             <FluidTemplate>
+//               <HomePage />
+//             </FluidTemplate>
+//           }
+//         />
+
+//         {/* Otros rutas */}
+//       </Routes>
+//     </Router>
+//   );
+// };
+
+// export default App;
+
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+// import LoginPage from './components/pages/LoginPage';
+import HomePage from './components/pages/HomePage';
+import LoginPage from './components/organisms/LoginPage';
+import AdminTemplate from './components/templates/AdminTemplate';
+import AppointmentPage from './components/pages/Appointments/AppointmentListPage';
+
+import UserList from './components/pages/Users/UserListPage';
+import ReviewList from './components/pages/Reviews/ReviewListPage';
+import PartnerList from './components/pages/Partners/PartnerListPage';
+import TreatmentList from './components/pages/Treatments/TreatmentsListPage';
+import ServiceList from './components/pages/ServicesHarmony/ServiceListPage';
+import VideoList from './components/pages/Videos/VideosListPage';
+import QuestionList from './components/pages/Questions/QuestionListPage';
+import BranchList from './components/pages/Branches/BranchesListPage';
+import CalendarComponent from './components/molecules/CalendarComponent';
+import AppointmentList from './components/pages/Appointments/AppointmentListPage';
+import PrivateRoute from './components/organisms/PrivateRoute';
+// import AppTemplate from './components/templates/AppTemplate'; // Importa la plantilla principal
+
+const App: React.FC = () => {
+  return (
+    <Router>
+      <Routes>
+        <Route
+          path="/employee"
+          element={
+            <AdminTemplate>
+              <div style={{ margin: '0% 5% 10% 5%' }}>
+                <UserList />
+              </div>
+            </AdminTemplate>
+          }
+        />
+        {/* <PrivateRoute path="/home" element={<HomePage />} /> */}
+        <Route
+          path="/reviews"
+          element={
+            <AdminTemplate>
+              <div style={{ margin: '0% 5% 10% 5%' }}>
+                <ReviewList />
+              </div>
+            </AdminTemplate>
+          }
+        />
+        <Route
+          path="/partners"
+          element={
+            <AdminTemplate>
+              <div style={{ margin: '0% 5% 10% 5%' }}>
+                <PartnerList />
+              </div>
+            </AdminTemplate>
+          }
+        />
+        <Route
+          path="/treatments"
+          element={
+            <AdminTemplate>
+              <div style={{ margin: '0% 5% 10% 5%' }}>
+                <TreatmentList />
+              </div>
+            </AdminTemplate>
+          }
+        />
+        <Route
+          path="/services"
+          element={
+            <AdminTemplate>
+              <div style={{ margin: '0% 5% 10% 5%' }}>
+                <ServiceList />
+              </div>
+            </AdminTemplate>
+          }
+        />
+        <Route
+          path="/videos"
+          element={
+            <AdminTemplate>
+              <div style={{ margin: '0% 5% 10% 5%' }}>
+                <VideoList />
+              </div>
+            </AdminTemplate>
+          }
+        />
+        <Route
+          path="/questions"
+          element={
+            <AdminTemplate>
+              <div style={{ margin: '0% 5% 10% 5%' }}>
+                <QuestionList />
+              </div>
+            </AdminTemplate>
+          }
+        />
+        <Route
+          path="/branches"
+          element={
+            <AdminTemplate>
+              <div style={{ margin: '0% 5% 10% 5%' }}>
+                <BranchList />
+              </div>
+            </AdminTemplate>
+          }
+        />
+        
+        
+        <Route
+          path="/appointment"
+          element={
+            <AdminTemplate>
+              <div style={{ margin: '0% 5% 10% 5%' }}>
+                <AppointmentList />
+              </div>
+            </AdminTemplate>
+          }
+        />
+
+<Route path="/" element={<LoginPage />} />
+
+
+        {/* Otras rutas */}
+      </Routes>
+    </Router>
+  );
+};
+
+export default App;

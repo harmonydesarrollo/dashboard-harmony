@@ -6,6 +6,7 @@ export interface Partners {
 }
 
 export interface UpdatePartners {
+  _id: string;
   img: string;
   title: string;
   description: string;

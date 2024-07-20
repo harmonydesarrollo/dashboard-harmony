@@ -11,7 +11,14 @@ export interface Users {
   idRol: string;
   photo: string;
   specialty: string;
+  username: string;
+  password: string;
 }
+export interface dtoLogin {
+username:string;
+password: string;
+}
+
 export interface CreateUsers {
   firstName: string;
   lastName: string;
@@ -20,6 +27,10 @@ export interface CreateUsers {
   idSpecialty: string;
   photo: string;
   specialty: string;
+  idBranch: string;
+  idRol: string;
+  username: string;
+  password?: string;
 }
 
 export interface UpdateUsers {
@@ -34,9 +45,18 @@ export interface UpdateUsers {
   idBranch?: string;
   idRol?: string;
   photo: string;
+  username: string;
+  password?: string;
+}
+
+export interface UsersLogin {
+  _id: string;
+  fullName: string;
+  photo: string;
+  username: string;
 }
 export interface ResponseCreateUser {
-  status: string;
+  code: string;
   message: string;
-  items: Users[];
+  items: UsersLogin[];
 }

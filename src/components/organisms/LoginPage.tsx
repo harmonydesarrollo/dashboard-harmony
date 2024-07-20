@@ -1,15 +1,59 @@
-import React from 'react';
-import { Container, Typography, Box, TextField, Button, Avatar } from '@mui/material';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import { useNavigate } from 'react-router-dom'; // Importa el hook useNavigate
+import React, { useEffect, useState } from 'react';
+import { Container, Typography, Box, TextField, Button, Avatar, Stack, Alert, AlertTitle } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { LoginResponse, authServices, dtoLogin } from '../../services/auth/authService';
 
 const LoginPage: React.FC = () => {
-  const navigate = useNavigate(); // Inicializa el hook useNavigate
+  const [successMessage, setSuccessMessage] = useState<string>('');
+  const [message, setMessage] = useState<string>('');
+  const [username, setUserName] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const navigate = useNavigate();
 
-  const handleLogin = () => {
-    // Aquí iría la lógica para verificar las credenciales y realizar el inicio de sesión
-    // Por ahora, simplemente redirigimos al usuario a la página de inicio después de hacer clic en el botón
-    navigate('/home'); // Redirige al usuario a la página de inicio
+  useEffect(() => {
+    const code = localStorage.getItem('code');
+    const photo = localStorage.getItem('photo');
+    const fullname = localStorage.getItem('fullName');
+    const userId = localStorage.getItem('_id');
+    
+    if (code) {
+      navigate('/employee'); // Redirect to employee if already authenticated
+    }
+  }, [navigate]);
+
+  const handleLogin = async () => {
+    const dtoAuxLogin: dtoLogin = {
+      username: username,
+      password: password
+    };
+    
+    try {
+      if(username.length === 0  || password.length === 0){
+        setSuccessMessage('Debes de escribir tu usuario y contraseña.');
+        setMessage('Datos Obligatorios.')
+      }else{
+        const response = await authServices.Auth(dtoAuxLogin, "");
+        if (response.code === 200) {
+          // console.log('entro?')
+          // Store user data in localStorage
+          localStorage.setItem('code', response.code);
+          localStorage.setItem('photo', response.items[0].photo);
+          localStorage.setItem('fullname', response.items[0].fullName);
+          localStorage.setItem('_id', response.items[0]._id);
+          navigate('/employee');
+        } else {
+          setSuccessMessage('Usuario o Contraseña incorrecta, verifica tus datos.');
+        }
+      }
+      
+    } catch (error) {
+      console.error('Error during login:', error);
+      setSuccessMessage('Ocurrió un error, intenta nuevamente.');
+    }
+  };
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setUserName(event.target.value);
   };
 
   return (
@@ -25,13 +69,29 @@ const LoginPage: React.FC = () => {
         <Avatar
           sx={{ width: 80, height: 80, mb: 2 }}
           alt="Logo"
-          src="https://content.wepik.com/statics/27179704/preview-page0.jpg"
+          src="https://harmony-web.s3.amazonaws.com/logo.jpg"
         />
         <Typography component="h1" variant="h5">
           Iniciar Sesión
         </Typography>
         <Box component="form" noValidate sx={{ mt: 1 }}>
+        <TextField
+            margin="normal"
+            label="Usuario"
+            variant="outlined"
+            fullWidth
+            value={username}
+            onChange={(e) => setUserName(e.target.value)}
+          />
           <TextField
+            margin="normal"
+            label="Contraseña"
+            variant="outlined"
+            fullWidth
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          {/* <TextField
             margin="normal"
             required
             fullWidth
@@ -40,6 +100,8 @@ const LoginPage: React.FC = () => {
             name="username"
             autoComplete="username"
             autoFocus
+            value={username}
+            onChange={handleSearchChange}
           />
           <TextField
             margin="normal"
@@ -50,7 +112,9 @@ const LoginPage: React.FC = () => {
             type="password"
             id="password"
             autoComplete="current-password"
-          />
+            value={password}
+            onChange={handleSearchChange}
+          /> */}
           <Button
             onClick={handleLogin}
             fullWidth
@@ -61,6 +125,19 @@ const LoginPage: React.FC = () => {
           </Button>
         </Box>
       </Box>
+      {successMessage && (
+        <Stack sx={{ width: '100%' }} spacing={2}>
+          <Alert
+            severity="error"
+            onClose={() => setSuccessMessage('')}
+          >
+            <AlertTitle>
+              {message}
+              </AlertTitle>
+            {successMessage}
+          </Alert>
+        </Stack>
+      )}
     </Container>
   );
 };
