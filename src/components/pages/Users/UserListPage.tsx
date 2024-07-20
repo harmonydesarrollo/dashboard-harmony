@@ -284,6 +284,8 @@ const UserList = () => {
               updatedAt,
               __v: v,
               specialty,
+              username:rolAux,
+              password:password,
             }
           : user
       );
