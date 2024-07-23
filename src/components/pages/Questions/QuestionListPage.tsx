@@ -278,6 +278,7 @@ const QuestionList = () => {
             fullWidth
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
+            disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
           />
           <TextField
             margin="normal"
@@ -288,11 +289,13 @@ const QuestionList = () => {
             rows={4}
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
+            disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
           />
         </DialogContent>
         <DialogActions>
           {selectedQuestion && (
-            <Button onClick={() => setConfirmOpen(true)} variant="contained" color="error">
+            <Button onClick={() => setConfirmOpen(true)} variant="contained" color="error"
+            disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}>
               Eliminar
             </Button>
           )}
@@ -303,7 +306,7 @@ const QuestionList = () => {
             onClick={handleUpdateQuestion}
             variant="contained"
             color="primary"
-            disabled={!question || !answer}
+            disabled={!question || !answer || localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
           >
             {'Responder'}
           </Button>

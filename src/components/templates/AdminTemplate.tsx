@@ -295,6 +295,7 @@ const AdminTemplate: React.FC<AppTemplateProps> = ({ children }) => {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('isAdmin');
     localStorage.removeItem('code');
     localStorage.removeItem('photo');
     localStorage.removeItem('fullName');

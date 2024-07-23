@@ -161,7 +161,7 @@ const ServiceList = () => {
 
         await serviceServices.updateById(selectedReview._id, updatedReview, ''); // Actualizar la reseña en el backend
         const updatedReviews = reviews.map((review) =>
-          review._id === selectedReview._id ? { ...review, img, title, description } : review
+          review._id === selectedReview._id ? { ...review, img, title, description, idBranch: selectedBranch } : review
         );
 
         setReviews(updatedReviews);
@@ -315,6 +315,7 @@ const ServiceList = () => {
             fullWidth
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
           />
           <TextField
             margin="normal"
@@ -325,6 +326,7 @@ const ServiceList = () => {
             rows={4}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
           />
           <br/>
           <br/>
@@ -339,6 +341,7 @@ const ServiceList = () => {
                       setSelectedBranch(selectedBranchId);
                       setBranch(selectedBranchName); // Establecer el nombre de la especialidad en el estado specialty
                     }}
+                    disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
                   >
                     {initialBranches.map((specialty) => (
                       <MenuItem key={specialty._id} value={specialty._id}>
@@ -352,7 +355,7 @@ const ServiceList = () => {
               <br/>
           <br/>
           {/* Input para cargar imágenes */}
-          <Tooltip title="Buscar imagen representativa">
+          <Tooltip title={localStorage.getItem('isAdmin') ==="Empleado" ? "No tienes permiso de cambiar la imagen" : "Buscar imagen representativa"}>
             <Box mb={2} textAlign="center">
               <input
                 id="fileInput"
@@ -371,6 +374,7 @@ const ServiceList = () => {
                     reader.readAsDataURL(file);
                   }
                 }}
+                disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
               />
               <label htmlFor="fileInput">
                 <img
@@ -392,7 +396,8 @@ const ServiceList = () => {
         </DialogContent>
         <DialogActions>
           {selectedReview && (
-            <Button onClick={() => setConfirmOpen(true)} variant="contained" color="error">
+            <Button onClick={() => setConfirmOpen(true)} variant="contained" color="error"
+            disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}>
               Eliminar
             </Button>
           )}
@@ -403,7 +408,7 @@ const ServiceList = () => {
             onClick={selectedReview ? handleUpdateReview : handleAddReview}
             variant="contained"
             color="primary"
-            disabled={!title || !description}
+            disabled={!title || !description || localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
           >
             {selectedReview ? 'Actualizar' : 'Agregar'}
           </Button>
@@ -423,7 +428,8 @@ const ServiceList = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      <Button onClick={() => openModal('', null)} variant="contained" color="primary">
+      <Button onClick={() => openModal('', null)} variant="contained" color="primary" 
+        disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}>
         NUEVO
       </Button>
     </Container>

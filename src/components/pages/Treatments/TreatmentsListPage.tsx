@@ -74,6 +74,7 @@ const TreatmentList = () => {
     const fetchReviews = async () => {
       try {
         const response = await treatmentsServices.getAllTreatments('');
+        console.log({response})
         setReviews(response);
       } catch (error) {
         console.error('Error fetching reviews:', error);
@@ -96,6 +97,8 @@ const TreatmentList = () => {
 
   const openModal = (reviewId: string, review: Treatments | null = null) => {
     const selectedReviewData = reviews.find((r) => r._id === reviewId);
+
+    console.log({selectedReviewData})
 
     if (selectedReviewData) {
       setSelectedReview(selectedReviewData);
@@ -162,11 +165,13 @@ const TreatmentList = () => {
           }
         }
 
+        console.log({selectedBranch})
         await treatmentsServices.updateById(selectedReview._id, updatedReview, ''); // Actualizar la reseña en el backend
         const updatedReviews = reviews.map((review) =>
-          review._id === selectedReview._id ? { ...review, img, title, description } : review
+          review._id === selectedReview._id ? { ...review, img, title, description, idBranch: selectedBranch } : review
         );
 
+        console.log({updatedReviews})
         setReviews(updatedReviews);
         clearInputFields();
         closeModal();
@@ -318,6 +323,7 @@ const TreatmentList = () => {
             fullWidth
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
           />
           <TextField
             margin="normal"
@@ -328,6 +334,7 @@ const TreatmentList = () => {
             rows={4}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
           />
           <br/>
           <br/>
@@ -342,6 +349,7 @@ const TreatmentList = () => {
                       setSelectedBranch(selectedBranchId);
                       setBranch(selectedBranchName); // Establecer el nombre de la especialidad en el estado specialty
                     }}
+                    disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
                   >
                     {initialBranches.map((specialty) => (
                       <MenuItem key={specialty._id} value={specialty._id}>
@@ -355,7 +363,7 @@ const TreatmentList = () => {
               <br/>
           <br/>
           {/* Input para cargar imágenes */}
-          <Tooltip title="Busca la imagen del tratamiento">
+          <Tooltip title={localStorage.getItem('isAdmin') ==="Empleado" ? "No tienes permiso de cambiar la imagen" : "Busca la imagen del tratamiento"}>
             <Box mb={2} textAlign="center">
               <input
                 id="fileInput"
@@ -374,6 +382,7 @@ const TreatmentList = () => {
                     reader.readAsDataURL(file);
                   }
                 }}
+                disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
               />
               <label htmlFor="fileInput">
                 <img
@@ -396,7 +405,8 @@ const TreatmentList = () => {
         </DialogContent>
         <DialogActions>
           {selectedReview && (
-            <Button onClick={() => setConfirmOpen(true)} variant="contained" color="error">
+            <Button onClick={() => setConfirmOpen(true)} variant="contained" color="error"
+            disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}>
               Eliminar
             </Button>
           )}
@@ -407,7 +417,7 @@ const TreatmentList = () => {
             onClick={selectedReview ? handleUpdateReview : handleAddReview}
             variant="contained"
             color="primary"
-            disabled={!title || !description}
+            disabled={!title || !description || localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
           >
             {selectedReview ? 'Actualizar' : 'Agregar'}
           </Button>
@@ -427,7 +437,7 @@ const TreatmentList = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      <Button onClick={() => openModal('', null)} variant="contained" color="primary">
+      <Button onClick={() => openModal('', null)} variant="contained" color="primary" disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}>
         NUEVO
       </Button>
     </Container>

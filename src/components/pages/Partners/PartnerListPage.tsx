@@ -291,6 +291,7 @@ const PartnerList = () => {
             fullWidth
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
           />
           <TextField
             margin="normal"
@@ -301,9 +302,10 @@ const PartnerList = () => {
             rows={4}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
           />
           {/* Input para cargar imágenes */}
-          <Tooltip title="Busca el logotipo de tu empresa">
+          <Tooltip title={localStorage.getItem('isAdmin') ==="Empleado" ? "No tienes permiso de cambiar la imagen" : "Busca el logotipo de tu empresa"}>
             <Box mb={2} textAlign="center">
               <input
                 id="fileInput"
@@ -322,7 +324,9 @@ const PartnerList = () => {
                     reader.readAsDataURL(file);
                   }
                 }}
+                disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
               />
+              
               <label htmlFor="fileInput">
                 <img
                   //
@@ -343,7 +347,12 @@ const PartnerList = () => {
         </DialogContent>
         <DialogActions>
           {selectedReview && (
-            <Button onClick={() => setConfirmOpen(true)} variant="contained" color="error">
+            <Button 
+              onClick={() => setConfirmOpen(true)} 
+              variant="contained" 
+              color="error"
+              disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
+              >
               Eliminar
             </Button>
           )}
@@ -354,7 +363,7 @@ const PartnerList = () => {
             onClick={selectedReview ? handleUpdateReview : handleAddReview}
             variant="contained"
             color="primary"
-            disabled={!title || !description}
+            disabled={!title || !description || localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
           >
             {selectedReview ? 'Actualizar' : 'Agregar'}
           </Button>
@@ -374,8 +383,12 @@ const PartnerList = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      <Button onClick={() => openModal('', null)} variant="contained" color="primary">
-        Agregar Socio
+      <Button onClick={() => openModal('', null)} 
+      variant="contained" 
+      color="primary"
+      disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
+      >
+        NUEVO
       </Button>
     </Container>
   );

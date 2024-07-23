@@ -38,6 +38,7 @@ import { Branches } from '../../types/branches';
 import { branchServices } from '../../../services/branches/branches';
 import { rolServices } from '../../../services/roles/roles';
 import { Roles } from '../../types/roles';
+import { display } from '@mui/system';
 
 const UserList = () => {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -456,10 +457,21 @@ const UserList = () => {
             {/* Columna 1 */}
             <Box width="450px" mr={2}>
               <Box mb={2}>
-                <TextField label="Nombre" value={firstName} onChange={(e) => setFirstName(e.target.value)} fullWidth />
+                <TextField 
+                label="Nombre" 
+                value={firstName} 
+                onChange={(e) => setFirstName(e.target.value)} 
+                fullWidth 
+                disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}/>
               </Box>
               <Box mb={2}>
-                <TextField label="A. Paterno" value={lastName} onChange={(e) => setLastName(e.target.value)} fullWidth />
+                <TextField 
+                  label="A. Paterno" 
+                  value={lastName} 
+                  onChange={(e) => setLastName(e.target.value)}
+                  fullWidth 
+                  disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
+                  />
               </Box>
               <Box mb={2}>
                 <TextField
@@ -467,6 +479,7 @@ const UserList = () => {
                   value={middleName}
                   onChange={(e) => setMiddleName(e.target.value)}
                   fullWidth
+                  disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
                 />
               </Box>
               <Box>
@@ -480,6 +493,7 @@ const UserList = () => {
                       setSelectedSpecialty(selectedSpecialtyId);
                       setSpecialty(selectedSpecialtyName); // Establecer el nombre de la especialidad en el estado specialty
                     }}
+                    disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
                   >
                     {initialSpecialties.map((specialty) => (
                       <MenuItem key={specialty._id} value={specialty._id}>
@@ -501,6 +515,7 @@ const UserList = () => {
                       setSelectedBranch(selectedBranchId);
                       setBranch(selectedBranchName); // Establecer el nombre de la especialidad en el estado specialty
                     }}
+                    disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
                   >
                     {initialBranches.map((specialty) => (
                       <MenuItem key={specialty._id} value={specialty._id}>
@@ -522,7 +537,7 @@ const UserList = () => {
               flexDirection="column"
               justifyContent="center"
             >
-              <Tooltip title="Buscar imagen">
+              <Tooltip title={localStorage.getItem('isAdmin') ==="Empleado" ? "No tienes permiso de cambiar la imagen" : "Buscar imagen"}>
                 <Box mb={2} textAlign="center">
                   <input
                     id="fileInput"
@@ -541,6 +556,7 @@ const UserList = () => {
                         reader.readAsDataURL(file);
                       }
                     }}
+                    disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
                   />
                   <label htmlFor="fileInput">
                     <img
@@ -572,6 +588,7 @@ const UserList = () => {
                       setSelectedRolAux(selectedBranchId);
                       setRolAux(selectedBranchName); 
                     }}
+                    disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
                   >
                     {initialRolesAux.map((rol) => (
                       <MenuItem key={rol._id} value={rol._id}>
@@ -583,7 +600,9 @@ const UserList = () => {
                 </FormControl>
               </Box>
               <Box mb={2}>
-                <TextField label="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} fullWidth />
+                <TextField label="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} fullWidth 
+                  style={{display:localStorage.getItem('isAdmin') ==="Empleado" ? 'none' : 'block'}}
+                  />
               </Box>
             </Box>
           </Box>
@@ -602,7 +621,7 @@ const UserList = () => {
                   }}
                   variant="contained"
                   color="primary"
-                  disabled={!firstName || !lastName || !selectedSpecialty || !selectedBranch}
+                  disabled={!firstName || !lastName || !selectedSpecialty || !selectedBranch || localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
                 >
                   Actualizar
                 </Button>
@@ -613,6 +632,7 @@ const UserList = () => {
                   }}
                   variant="contained"
                   color="error"
+                  disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
                 >
                   Eliminar
                 </Button>
@@ -666,8 +686,8 @@ const UserList = () => {
       />
       <br />
       <div>
-        <Button variant="contained" color="primary" onClick={() => openModal(selectedUserId)}>
-          Nuevo
+        <Button variant="contained" color="primary" onClick={() => openModal(selectedUserId)} disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}>
+          NUEVO
         </Button>
       </div>
     </Container>

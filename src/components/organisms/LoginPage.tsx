@@ -33,13 +33,17 @@ const LoginPage: React.FC = () => {
         setMessage('Datos Obligatorios.')
       }else{
         const response = await authServices.Auth(dtoAuxLogin, "");
+        
         if (response.code === 200) {
           // console.log('entro?')
           // Store user data in localStorage
+
+          localStorage.setItem('isAdmin', response.items[0].username);
           localStorage.setItem('code', response.code);
           localStorage.setItem('photo', response.items[0].photo);
           localStorage.setItem('fullname', response.items[0].fullName);
           localStorage.setItem('_id', response.items[0]._id);
+          
           navigate('/employee');
         } else {
           setSuccessMessage('Usuario o Contraseña incorrecta, verifica tus datos.');

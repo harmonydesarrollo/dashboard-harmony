@@ -312,6 +312,7 @@ const VideoList = () => {
             fullWidth
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
           />
           <TextField
             margin="normal"
@@ -322,6 +323,7 @@ const VideoList = () => {
             rows={4}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
           />
           <TextField
             margin="normal"
@@ -330,6 +332,7 @@ const VideoList = () => {
             fullWidth
             value={urlVideo}
             onChange={(e) => setUrlVideo(e.target.value)}
+            disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
           />
           {/* Mostrar vista previa del video de YouTube */}
           {urlVideo && (
@@ -353,7 +356,8 @@ const VideoList = () => {
         </DialogContent>
         <DialogActions>
           {selectedVideo && (
-            <Button onClick={() => setConfirmOpen(true)} variant="contained" color="error">
+            <Button onClick={() => setConfirmOpen(true)} variant="contained" color="error"
+            disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}>
               Eliminar
             </Button>
           )}
@@ -364,7 +368,7 @@ const VideoList = () => {
             onClick={selectedVideo ? handleUpdateVideo : handleAddVideo}
             variant="contained"
             color="primary"
-            disabled={!title || !description}
+            disabled={!title || !description || localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
           >
             {selectedVideo ? 'Actualizar' : 'Agregar'}
           </Button>
@@ -384,8 +388,9 @@ const VideoList = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      <Button onClick={() => openModal('', null)} variant="contained" color="primary">
-        Agregar Video
+      <Button onClick={() => openModal('', null)} variant="contained" color="primary" 
+      disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}>
+        NUEVO
       </Button>
     </Container>
   );

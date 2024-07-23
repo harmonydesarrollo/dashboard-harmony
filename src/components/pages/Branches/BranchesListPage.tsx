@@ -259,7 +259,7 @@ const BranchList = () => {
           <TableHead style={{ backgroundColor: '#f0f0f0' }}>
             <TableRow>
               <TableCell style={{ fontWeight: 700 }}>NOMBRE</TableCell>
-              <TableCell style={{ fontWeight: 700 }}># INTERIOR</TableCell>
+              <TableCell style={{ fontWeight: 700 }}>#</TableCell>
               <TableCell style={{ fontWeight: 700 }}>CIUDAD</TableCell>
               <TableCell style={{ fontWeight: 700 }}>MUNICIPIO</TableCell>
               <TableCell style={{ fontWeight: 700 }}>ESTADO</TableCell>
@@ -306,16 +306,18 @@ const BranchList = () => {
             fullWidth
             value={name}
             onChange={(e) => setName(e.target.value)}
+            disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
           />
           <TextField
             margin="normal"
-            label="# interior"
+            label="# del local"
             variant="outlined"
             fullWidth
             multiline
             // rows={4}
             value={number}
             onChange={(e) => setNumber(e.target.value)}
+            disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
           />
           <TextField
             margin="normal"
@@ -326,6 +328,7 @@ const BranchList = () => {
             // rows={4}
             value={city}
             onChange={(e) => setCity(e.target.value)}
+            disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
           />
           <TextField
             margin="normal"
@@ -336,6 +339,7 @@ const BranchList = () => {
             // rows={4}
             value={municipality}
             onChange={(e) => setMunicipality(e.target.value)}
+            disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
           />
           <TextField
             margin="normal"
@@ -346,6 +350,7 @@ const BranchList = () => {
             // rows={4}
             value={state}
             onChange={(e) => setState(e.target.value)}
+            disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
           />
           <TextField
             margin="normal"
@@ -358,11 +363,13 @@ const BranchList = () => {
             // onChange={(e) => setPhone(e.target.value)}
             onChange={handlePhoneChange}
             inputProps={{ maxLength: 10, pattern: '[0-9]*' }} // Aquí se establece el máximo de caracteres permitidos
+            disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
           />
         </DialogContent>
         <DialogActions>
           {selectedBranch && (
-            <Button onClick={() => setConfirmOpen(true)} variant="contained" color="error">
+            <Button onClick={() => setConfirmOpen(true)} variant="contained" color="error"
+            disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}>
               Eliminar
             </Button>
           )}
@@ -373,7 +380,7 @@ const BranchList = () => {
             onClick={selectedBranch ? handleUpdateBranch : handleAddBranch}
             variant="contained"
             color="primary"
-            disabled={!name || !number || !city || !municipality || !state || !phone || phone.length < 10}
+            disabled={!name || !number || !city || !municipality || !state || !phone || phone.length < 10 || localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
           >
             {selectedBranch ? 'Actualizar' : 'Agregar'}
           </Button>
@@ -393,8 +400,9 @@ const BranchList = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      <Button onClick={() => openModal('', null)} variant="contained" color="primary">
-        Agregar Sucursal
+      <Button onClick={() => openModal('', null)} variant="contained" color="primary" 
+        disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}>
+        NUEVA
       </Button>
     </Container>
   );
