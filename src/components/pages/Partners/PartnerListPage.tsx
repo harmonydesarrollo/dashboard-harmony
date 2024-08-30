@@ -28,6 +28,7 @@ import {
 import { partnerServices } from '../../../services/partners/partners';
 import { CreateReviews, Reviews, UpdateReviews } from '../../types/reviews';
 import { awsServices } from '../../../services/aws/aws'; // Importar awsServices
+import { generateUniqueId } from '../../utils/generateNamesUniques';
 // import { reviewServices } from '../../../services/reviews/reviews';
 
 const PartnerList = () => {
@@ -96,7 +97,12 @@ const PartnerList = () => {
       const fileInput = document.getElementById('fileInput') as HTMLInputElement;
       if (fileInput && fileInput.files && fileInput.files[0]) {
         const file = fileInput.files[0];
-        const photoUrl: any = await awsServices.insertImgInS3(file, ''); // Subir imagen al servicio S3
+        const uniqueFileName = `${generateUniqueId()}.${file.name.split('.').pop()}`;
+          
+        // Crear un nuevo archivo con el nombre único
+        const newFile = new File([file], uniqueFileName, { type: file.type });
+        
+         const photoUrl: any = await awsServices.insertImgInS3(newFile, ''); // Subir imagen al servicio S3
         newReview.img = decodeURIComponent(photoUrl.fileUrl); // Actualizar URL de imagen en la reseña
         setUpdatePhoto(true); // Se ha cargado una nueva foto
       }
@@ -131,7 +137,12 @@ const PartnerList = () => {
           const fileInput = document.getElementById('fileInput') as HTMLInputElement;
           if (fileInput && fileInput.files && fileInput.files[0]) {
             const file = fileInput.files[0];
-            const photoUrl: any = await awsServices.insertImgInS3(file, '');
+            const uniqueFileName = `${generateUniqueId()}.${file.name.split('.').pop()}`;
+          
+            // Crear un nuevo archivo con el nombre único
+            const newFile = new File([file], uniqueFileName, { type: file.type });
+            
+             const photoUrl: any = await awsServices.insertImgInS3(newFile, ''); // Subir imagen al servicio S3
             updatedReview.img = decodeURIComponent(photoUrl.fileUrl); // Actualizar URL de imagen en la reseña
           }
         }

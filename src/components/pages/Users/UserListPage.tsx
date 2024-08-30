@@ -39,6 +39,7 @@ import { branchServices } from '../../../services/branches/branches';
 import { rolServices } from '../../../services/roles/roles';
 import { Roles } from '../../types/roles';
 import { display } from '@mui/system';
+import { generateUniqueId } from '../../utils/generateNamesUniques';
 
 const UserList = () => {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -188,10 +189,14 @@ const UserList = () => {
     const fileInput = document.getElementById('fileInput') as HTMLInputElement;
     if (fileInput && fileInput.files && fileInput.files[0]) {
       const file = fileInput.files[0];
+      const uniqueFileName = `${generateUniqueId()}.${file.name.split('.').pop()}`;
+            
+         // Crear un nuevo archivo con el nombre único
+         const newFile = new File([file], uniqueFileName, { type: file.type });
 
       try {
         // Subir la foto al servicio S3
-        const photoUrl: any = await awsServices.insertImgInS3(file, ''); //uploadImageToServer(file);
+        const photoUrl: any = await awsServices.insertImgInS3(newFile, ''); //uploadImageToServer(file);
 
         // Agregar la URL de la foto al nuevo usuario
         newUser.photo = decodeURIComponent(photoUrl.fileUrl);
@@ -240,7 +245,14 @@ const UserList = () => {
       const fileInput = document.getElementById('fileInput') as HTMLInputElement;
       if (fileInput && fileInput.files && fileInput.files[0]) {
         const file = fileInput.files[0];
-        const photoUrl: any = await awsServices.insertImgInS3(file, '');
+         // Generar un nombre único para el archivo
+         const uniqueFileName = `${generateUniqueId()}.${file.name.split('.').pop()}`;
+            
+         // Crear un nuevo archivo con el nombre único
+         const newFile = new File([file], uniqueFileName, { type: file.type });
+         console.log({newFile})
+         
+        const photoUrl: any = await awsServices.insertImgInS3(newFile, '');
         auxPhoto = photoUrl.fileUrl;
       }
     }

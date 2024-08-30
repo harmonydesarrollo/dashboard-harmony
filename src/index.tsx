@@ -31,7 +31,7 @@ const preventRightClick = (e: MouseEvent) => {
 };
 
 // Añadir event listener para capturar el clic derecho en el documento
-document.addEventListener('contextmenu', preventRightClick);
+// document.addEventListener('contextmenu', preventRightClick);
 
 ReactDOM.render(
     <React.StrictMode>

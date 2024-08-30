@@ -94,6 +94,7 @@ async function getAllUsers(idCompany: string, token: string, page: number, perPa
     // console.log({formattedData});
     const transformedResponse = formattedData.map((item: { user: any }) => item.user);
 
+    console.log({transformedResponse})
     return transformedResponse;
   } catch (e) {
     throw new Error(JSON.stringify(e));
