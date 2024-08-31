@@ -12,12 +12,12 @@ async function login(data: CreateUsers, token: string): Promise<any> {
       }
     }
 
-    // console.log(JSON.stringify(modifiedUserInfo));
+    
     const response = await HarmonyApi.post<any>('users/', modifiedUserInfo, {
       headers: { Authorization: 'Bearer ' + token },
     });
 
-    // console.log(response);
+    
     return response.data;
   } catch (e) {
     throw new Error(JSON.stringify(e));
@@ -35,12 +35,12 @@ async function createUser(data: CreateUsers, token: string): Promise<any> {
       }
     }
 
-    // console.log(JSON.stringify(modifiedUserInfo));
+    
     const response = await HarmonyApi.post<any>('users/', modifiedUserInfo, {
       headers: { Authorization: 'Bearer ' + token },
     });
 
-    // console.log(response);
+    
     return response.data;
   } catch (e) {
     throw new Error(JSON.stringify(e));
@@ -72,7 +72,7 @@ async function getAllUsers(idCompany: string, token: string, page: number, perPa
       headers: { Authorization: 'Bearer ' + token },
     });
 
-    // console.log({response})
+    
     const formattedData = response.data.map((item: any) => ({
       user: {
         _id: item.user._id,
@@ -91,10 +91,10 @@ async function getAllUsers(idCompany: string, token: string, page: number, perPa
         password: item.user.password
       },
     }));
-    // console.log({formattedData});
+    
     const transformedResponse = formattedData.map((item: { user: any }) => item.user);
 
-    console.log({transformedResponse})
+    
     return transformedResponse;
   } catch (e) {
     throw new Error(JSON.stringify(e));

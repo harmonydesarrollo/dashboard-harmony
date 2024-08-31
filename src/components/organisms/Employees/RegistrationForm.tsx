@@ -33,7 +33,6 @@ interface RegistrationFormProps {
 
 const RegistrationForm: React.FC<RegistrationFormProps> = ({ employeeData, onSave, onCancel }) => {
   const navigate = useNavigate();
-// console.log({employeeData})
   // Inicializamos el estado del formulario con los datos proporcionados
   const [formData, setFormData] = useState({
     firstName: employeeData ? employeeData[1] : '',

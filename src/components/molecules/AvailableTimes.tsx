@@ -24,7 +24,6 @@ const AvailableTimes: React.FC<AvailableTimesProps> = ({ selectedDate, appointme
 
   const handleTimeSelection = (time: string) => {
     // Lógica para manejar la selección de horario
-    // console.log('Selected time:', time);
   };
 
   return (

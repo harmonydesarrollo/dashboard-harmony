@@ -13,5 +13,3 @@ export const generateUniqueId = (): string => {
   // Combinar el timestamp y el valor aleatorio
   return `${timestamp}-${paddedRandomPart}`;
 }
-
-console.log(generateUniqueId()); // Ejemplo de salida: '1678977285482-8a9d4f21'

@@ -19,16 +19,10 @@ export interface LoginResponse {
   async function Auth(data: dtoLogin, token: string): Promise<any> {
     try {
       const modifiedLoginInfo = { ...data };
-      // console.log({modifiedLoginInfo})
-  
-      // console.log(JSON.stringify(modifiedLoginInfo));
       const response = await HarmonyApi.post<any>('users/login', modifiedLoginInfo, {
         headers: { Authorization: 'Bearer ' + token },
       });
   
-      // console.log('******BEGIN********')
-      // console.log(response); 
-      // console.log('******END********')
       return response.data;
     } catch (e) {
       throw new Error(JSON.stringify(e));

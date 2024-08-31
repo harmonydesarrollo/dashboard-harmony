@@ -14,7 +14,6 @@ async function insertImgInS3(file: File, token: string): Promise<string> {
       },
     });
 
-    // console.log(response);
     return response.data;
   } catch (error) {
     console.error('Error al cargar la imagen:', error);
@@ -33,7 +32,6 @@ async function updateFileInS3(fileUrl: string, file: File, token: string): Promi
       },
     });
 
-    // console.log(response);
     return response.data;
   } catch (error) {
     console.error('Error al actualizar el archivo:', error);

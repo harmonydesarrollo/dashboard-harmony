@@ -6,12 +6,10 @@ async function createBranch(data: CreateBranches, token: string): Promise<any> {
   try {
     const modifiedUserInfo = { ...data };
 
-    // console.log(JSON.stringify(modifiedUserInfo));
     const response = await HarmonyApi.post<any>('branches/', modifiedUserInfo, {
       headers: { Authorization: 'Bearer ' + token },
     });
 
-    // console.log(response);
     return response.data;
   } catch (e) {
     throw new Error(JSON.stringify(e));

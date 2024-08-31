@@ -11,7 +11,6 @@ const EmployeePage = () => {
   // Check if user is authenticated
   useEffect(() => {
     const code = localStorage.getItem('code');
-    // console.log({code})
     if (code===undefined || code === null) {
       navigate('/login'); // Redirect to login if not authenticated
     }
@@ -37,7 +36,6 @@ const EmployeePage = () => {
   const fetchData = useCallback(async () => {
     try {
       const response: any = await employeeServices.getAllEmployees('', '', 0, 0);
-      // console.log(response);
 
       // Verificar si la respuesta es un array
       if (Array.isArray(response)) {
@@ -76,14 +74,12 @@ const EmployeePage = () => {
 
   useEffect(() => {
     const code = localStorage.getItem('code');
-    // console.log({code})
     fetchData();
   }, [fetchData]);
 
   const translatedHeaders = headers.map((header) => headerTranslations[header] || header);
 
   const handleRowClick = (rowData: any) => {
-    // console.log('Fila clickeada:', rowData);
     setshowAddEdit(true);
     setShowAdd(false);
     setDataEdit(rowData);
@@ -105,7 +101,6 @@ const EmployeePage = () => {
           showAdd={showAdd}
           data={dataEdit}
           onSave={(formData: any) => {
-            // console.log('Datos guardados:', formData);
             setshowAddEdit(false);
           }}
           onCancel={handleCancel}

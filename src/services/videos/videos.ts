@@ -6,12 +6,12 @@ async function createVideo(data: CreateVideos, token: string): Promise<any> {
   try {
     const modifiedVideoInfo = { ...data };
 
-    // console.log(JSON.stringify(modifiedVideoInfo));
+    
     const response = await HarmonyApi.post<any>('videos/', modifiedVideoInfo, {
       headers: { Authorization: 'Bearer ' + token },
     });
 
-    // console.log(response);
+    
     return response.data;
   } catch (e) {
     throw new Error(JSON.stringify(e));

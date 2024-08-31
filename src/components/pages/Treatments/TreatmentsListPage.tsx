@@ -35,6 +35,7 @@ import { awsServices } from '../../../services/aws/aws'; // Importar awsServices
 import { Branches } from '../../types/branches';
 import { branchServices } from '../../../services/branches/branches';
 import { generateUniqueId } from '../../utils/generateNamesUniques';
+import { maxSizeBytes, allowedFormats } from '../../utils/megas';
 // import { branchesServices } from '../../../services/branches/branches';
 // import { reviewServices } from '../../../services/reviews/reviews';
 
@@ -62,6 +63,10 @@ const TreatmentList = () => {
   const [loading, setLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
 
+  const [lblError, setLblError] = useState('');
+  const [lblErrorFormatCurrent, setLblErrorFormatCurrent] = useState('');
+  const [lblCorrectFormat, setLblCorrectFormat] = useState(false);
+
   const closeSuccessMessage = () => {
     setTimeout(() => {
       setSuccessMessage('');
@@ -75,7 +80,6 @@ const TreatmentList = () => {
     const fetchReviews = async () => {
       try {
         const response = await treatmentsServices.getAllTreatments('');
-        console.log({response})
         setReviews(response);
       } catch (error) {
         console.error('Error fetching reviews:', error);
@@ -98,8 +102,6 @@ const TreatmentList = () => {
 
   const openModal = (reviewId: string, review: Treatments | null = null) => {
     const selectedReviewData = reviews.find((r) => r._id === reviewId);
-
-    console.log({selectedReviewData})
 
     if (selectedReviewData) {
       setSelectedReview(selectedReviewData);
@@ -176,13 +178,11 @@ const TreatmentList = () => {
           }
         }
 
-        console.log({selectedBranch})
         await treatmentsServices.updateById(selectedReview._id, updatedReview, ''); // Actualizar la reseña en el backend
         const updatedReviews = reviews.map((review) =>
           review._id === selectedReview._id ? { ...review, img, title, description, idBranch: selectedBranch } : review
         );
 
-        console.log({updatedReviews})
         setReviews(updatedReviews);
         clearInputFields();
         closeModal();
@@ -382,17 +382,45 @@ const TreatmentList = () => {
                 accept="image/*"
                 style={{ display: 'none' }}
                 onChange={(e) => {
-                  const file = e.target.files && e.target.files[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                      if (reader.result) {
-                        setImg(reader.result.toString());
-                      }
-                    };
-                    reader.readAsDataURL(file);
-                  }
-                }}
+        const file = e.target.files && e.target.files[0];
+        if (file) {
+            const maxSizeMB = 3; // Tamaño máximo en MB
+            const allowedFormats = ['image/jpeg', 'image/png']; // Formatos permitidos
+            const maxSizeBytes = maxSizeMB * 1024 * 1024; // Convertir MB a bytes
+
+            setLblCorrectFormat(false);
+            // Validar el tamaño del archivo
+            if (file.size > maxSizeBytes) {
+              setLblError(`El tamaño de la imagen debe ser de ${maxSizeMB} MB o menos.`);
+              setLblErrorFormatCurrent(`Esta imagen pesa: ${(file.size / (1024 * 1024)).toFixed(2)} MB.`);
+                e.target.value = ''; // Limpiar la selección del archivo
+                return;
+            }
+
+            // Validar el formato del archivo
+            if (!allowedFormats.includes(file.type)) {
+                // Extraer el subtipo del tipo MIME (por ejemplo, "jpeg" de "image/jpeg")
+                const fileType = file.type.split('/')[1]; // Obtener el subtipo
+                setLblError(`El formato del archivo debe ser JPEG, JPG o PNG.`);
+                setLblErrorFormatCurrent(`Esta imagen es: ${fileType}`);
+                // alert(`El formato del archivo debe ser JPEG, JPG o PNG.\nEsta imagen es: ${fileType}`);
+                e.target.value = ''; // Limpiar la selección del archivo
+                return;
+            }
+
+            setLblError('El formato de la imagen es correcto.');
+            setLblErrorFormatCurrent('El tamaño esta dentro del rango admitido.');
+            setLblCorrectFormat(true);
+            // Si las validaciones pasan, leer la imagen
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                if (reader.result) {
+                    setImg(reader.result.toString());
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    }}
                 disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
               />
               <label htmlFor="fileInput">
@@ -411,6 +439,14 @@ const TreatmentList = () => {
               </label>
             </Box>
           </Tooltip>
+          <Box display="flex" flexDirection="column" alignItems="flex-start">
+            <label htmlFor="fileInput" style={{ display: 'block', color: lblCorrectFormat?'green':'red' }}>
+                {lblError}
+            </label>
+            <label htmlFor="fileInput" style={{ display: 'block', color: lblCorrectFormat?'green':'red' }}>
+                {lblErrorFormatCurrent }
+            </label>
+        </Box>
           
           {/* Fin del input para cargar imágenes */}
         </DialogContent>
@@ -428,7 +464,7 @@ const TreatmentList = () => {
             onClick={selectedReview ? handleUpdateReview : handleAddReview}
             variant="contained"
             color="primary"
-            disabled={!title || !description || localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
+            disabled={!title || !description || localStorage.getItem('isAdmin') ==="Empleado" || !lblCorrectFormat ? true : false}
           >
             {selectedReview ? 'Actualizar' : 'Agregar'}
           </Button>
@@ -448,6 +484,14 @@ const TreatmentList = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <Box display="flex" flexDirection="row" alignItems="flex-start">
+        <h3>
+          NOTA: 
+          <label htmlFor="fileInput" style={{ display: 'block', fontSize: 14 }}>
+            El tamaño máximo para subir una imagen es de 3 MB. y los formatos aceptados son: JPG, PNG, JPEG.
+        </label>
+        </h3>
+      </Box>
       <Button onClick={() => openModal('', null)} variant="contained" color="primary" disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}>
         NUEVO
       </Button>

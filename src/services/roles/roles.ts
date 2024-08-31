@@ -6,12 +6,11 @@ async function createRol(data: CreateRoles, token: string): Promise<any> {
   try {
     const modifiedUserInfo = { ...data };
 
-    // console.log(JSON.stringify(modifiedUserInfo));
+    
     const response = await HarmonyApi.post<any>('roles/', modifiedUserInfo, {
       headers: { Authorization: 'Bearer ' + token },
     });
 
-    // console.log(response);
     return response.data;
   } catch (e) {
     throw new Error(JSON.stringify(e));
@@ -37,7 +36,7 @@ async function getAllRoles(token: string): Promise<Roles[]> {
       headers: { Authorization: 'Bearer ' + token },
     });
 
-    // console.log(response);
+    
     
     return response && response.data;
   } catch (e) {

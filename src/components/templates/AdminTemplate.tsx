@@ -53,7 +53,7 @@
 //   };
 
 //   const handleLogout = () => {
-//     console.log('Logging out...');
+
 //     // Add your logout logic here
 //     localStorage.removeItem('code');
 //     handleMenuClose();
@@ -310,8 +310,6 @@ const AdminTemplate: React.FC<AppTemplateProps> = ({ children }) => {
   };
 
   const profileImage = localStorage.getItem('photo')?.toString() || ''; // Adjust key as necessary
-  // console.log({profileImage})
-
 
   return (
     <div style={{ display: 'flex' }}>

@@ -26,6 +26,7 @@ import {
   Alert,
   AlertTitle,
   Stack,
+  Skeleton,
 } from '@mui/material';
 
 import { userServices } from '../../../services/users/users';
@@ -40,6 +41,7 @@ import { rolServices } from '../../../services/roles/roles';
 import { Roles } from '../../types/roles';
 import { display } from '@mui/system';
 import { generateUniqueId } from '../../utils/generateNamesUniques';
+import { allowedFormats, maxSizeBytes } from '../../utils/megas';
 
 const UserList = () => {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -75,6 +77,13 @@ const UserList = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string>('');
 
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [lblError, setLblError] = useState('');
+  const [lblErrorFormatCurrent, setLblErrorFormatCurrent] = useState('');
+  const [lblCorrectFormat, setLblCorrectFormat] = useState(false);
+
+
   const closeSuccessMessage = () => {
     setTimeout(() => {
       setSuccessMessage('');
@@ -91,6 +100,9 @@ const UserList = () => {
         setUsers(response);
       } catch (error) {
         console.error('Error fetching users:', error);
+      }
+      finally {
+        setIsLoading(false);
       }
     };
 
@@ -119,7 +131,6 @@ const UserList = () => {
     const fetchRolesAux = async () => {
       try {
         const response = await rolServices.getAllRoles('');
-        // console.log(response)
         setInitialRolesAux(response);
       } catch (error) {
         console.error('Error fetching specialties:', error);
@@ -136,11 +147,9 @@ const UserList = () => {
   const [initialRolesAux, setInitialRolesAux] = useState<Roles[]>([]);
 
   const openModal = (userId: string, user: Users | null = null) => {
-    // console.log({users})
     const selectedUserData = users.find((u) => u._id === userId);
 
     if (selectedUserData) {
-      // console.log({selectedUserData})
       setSelectedUser(selectedUserData);
       setSelectedUserId(userId);
       setFirstName(selectedUserData.firstName);
@@ -167,65 +176,72 @@ const UserList = () => {
     setModalOpen(true);
   };
 
+
   const handleAddUser = async () => {
-    // console.log({rolAux})
-    // console.log({idRol})
-    
-    
+    // Crear el objeto de usuario sin la foto
     const newUser: CreateUsers = {
-      firstName,
-      lastName,
-      middleName,
-      fullName: `${firstName} ${lastName} ${middleName}`,
-      idSpecialty: selectedSpecialty,
-      photo: '', // Omitimos la foto aquí ya que la enviaremos por separado
-      specialty,
-      idBranch: selectedBranch,
-      idRol: selectedRolAux,
-      username:rolAux,
-      password:password,
+        firstName,
+        lastName,
+        middleName,
+        fullName: `${firstName} ${lastName} ${middleName}`,
+        idSpecialty: selectedSpecialty,
+        photo: '', // Omitimos la foto aquí ya que la enviaremos por separado
+        specialty,
+        idBranch: selectedBranch,
+        idRol: selectedRolAux,
+        username: rolAux,
+        password: password,
     };
-    // console.log({rolAux})
+
+    // Obtener el input de archivo
     const fileInput = document.getElementById('fileInput') as HTMLInputElement;
     if (fileInput && fileInput.files && fileInput.files[0]) {
-      const file = fileInput.files[0];
-      const uniqueFileName = `${generateUniqueId()}.${file.name.split('.').pop()}`;
-            
-         // Crear un nuevo archivo con el nombre único
-         const newFile = new File([file], uniqueFileName, { type: file.type });
+        const file = fileInput.files[0];
+        const uniqueFileName = `${generateUniqueId()}.${file.name.split('.').pop()}`;
 
-      try {
-        // Subir la foto al servicio S3
-        const photoUrl: any = await awsServices.insertImgInS3(newFile, ''); //uploadImageToServer(file);
+        // Crear un nuevo archivo con el nombre único
+        const newFile = new File([file], uniqueFileName, { type: file.type });
 
-        // Agregar la URL de la foto al nuevo usuario
-        newUser.photo = decodeURIComponent(photoUrl.fileUrl);
-      } catch (error) {
-        console.error('Error al agregar usuario:', error);
-      }
+        try {
+            // Subir la foto al servicio S3
+            const photoUrl: any = await awsServices.insertImgInS3(newFile, ''); //uploadImageToServer(file);
+
+            // Agregar la URL de la foto al nuevo usuario
+            newUser.photo = decodeURIComponent(photoUrl.fileUrl);
+        } catch (error) {
+            console.error('Error al subir la foto:', error);
+            // Asignar una foto por defecto en caso de error
+            newUser.photo = 'https://harmony-web.s3.amazonaws.com/logo.jpg';
+        }
     } else {
-      newUser.photo = 'https://harmony-web.s3.amazonaws.com/logo.jpg';
+        // Si no se seleccionó ninguna foto, asignar una foto por defecto
+        newUser.photo = 'https://harmony-web.s3.amazonaws.com/logo.jpg';
     }
-    // Crear el usuario con la foto y los demás datos
-    await userServices.createUser(newUser, '');
 
-    // Obtener la lista actualizada de usuarios después de agregar uno nuevo
-    const updatedUsers = await userServices.getAllUsers('', '', page, rowsPerPage);
+    try {
+        // Crear el usuario con la foto y los demás datos
+        await userServices.createUser(newUser, '');
 
-    // Actualizar el estado con la lista actualizada de usuarios
-    setUsers(updatedUsers);
+        // Obtener la lista actualizada de usuarios después de agregar uno nuevo
+        const updatedUsers = await userServices.getAllUsers('', '', page, rowsPerPage);
 
-    // Limpiar los campos
-    clearInputFields();
+        // Actualizar el estado con la lista actualizada de usuarios
+        setUsers(updatedUsers);
 
-    // Cerrar el modal
-    closeModal();
+        // Limpiar los campos
+        clearInputFields();
 
-    // Mostrar ventana modal de éxito
-    setAction('AGREGADO');
-    setSuccessOpen(true); // Mostrar el diálogo de éxito
-    setSuccessMessage(`Usuario agregado correctamente`);
-  };
+        // Cerrar el modal
+        closeModal();
+
+        // Mostrar ventana modal de éxito
+        setAction('AGREGADO');
+        setSuccessOpen(true); // Mostrar el diálogo de éxito
+        setSuccessMessage(`Usuario agregado correctamente`);
+    } catch (error) {
+        console.error('Error al agregar usuario:', error);
+    }
+};
 
   const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     const selectedRoleId = event.target.value as string;
@@ -250,7 +266,6 @@ const UserList = () => {
             
          // Crear un nuevo archivo con el nombre único
          const newFile = new File([file], uniqueFileName, { type: file.type });
-         console.log({newFile})
          
         const photoUrl: any = await awsServices.insertImgInS3(newFile, '');
         auxPhoto = photoUrl.fileUrl;
@@ -258,7 +273,6 @@ const UserList = () => {
     }
 
     if (selectedUser) {
-      // console.log({auxPhoto})
       const updateUser: UpdateUsers = {
         _id: selectedUser._id,
         gender,
@@ -344,6 +358,9 @@ const UserList = () => {
   };
 
   const clearInputFields = () => {
+    setLblError('');
+    setLblErrorFormatCurrent('');
+    setLblCorrectFormat(false)
     setSelectedUserId('');
     setFirstName('');
     setLastName('');
@@ -432,21 +449,37 @@ const UserList = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((user) => (
-              <TableRow
-                key={user._id}
-                onClick={() => openModal(user._id, user)}
-                style={{ cursor: 'pointer' }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f5f5f5')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'inherit')}
-              >
-                <TableCell>{user.fullName}</TableCell>
-                <TableCell>{user.specialty}</TableCell>
-                <TableCell>
-                  <img src={user.photo} alt="User" style={{ width: '100px', height: '100px', borderRadius: '50%' }} />
-                </TableCell>
-              </TableRow>
-            ))}
+            {isLoading ? 
+               Array.from(new Array(rowsPerPage)).map((_, index) => (
+                  <TableRow key={index}>
+                    <TableCell>
+                      <Skeleton variant="text" width={150} height={30} animation="wave" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton variant="text" width={150} height={30} animation="wave" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton variant="circular" width={100} height={100} animation="wave" />
+                    </TableCell>
+                  </TableRow>
+                ))
+            : 
+              filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((user) => (
+                <TableRow
+                  key={user._id}
+                  onClick={() => openModal(user._id, user)}
+                  style={{ cursor: 'pointer' }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f5f5f5')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'inherit')}
+                >
+                  <TableCell>{user.fullName}</TableCell>
+                  <TableCell>{user.specialty}</TableCell>
+                  <TableCell>
+                    <img src={user.photo} alt="User" style={{ width: '100px', height: '100px', borderRadius: '50%' }} />
+                  </TableCell>
+                </TableRow>
+              ))
+            }
           </TableBody>
         </Table>
       </TableContainer>
@@ -558,16 +591,45 @@ const UserList = () => {
                     style={{ display: 'none' }}
                     onChange={(e) => {
                       const file = e.target.files && e.target.files[0];
+              
                       if (file) {
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                          if (reader.result) {
-                            setPhoto(reader.result.toString());
+                          const maxSizeMB = 3; // Tamaño máximo en MB
+                          const allowedFormats = ['image/jpeg', 'image/png']; // Formatos permitidos
+                          const maxSizeBytes = maxSizeMB * 1024 * 1024; // Convertir MB a bytes
+              
+                          setLblCorrectFormat(false);
+                          // Validar el tamaño del archivo
+                          if (file.size > maxSizeBytes) {
+                            setLblError(`Tamaño máximo admitido 2MB.`);
+                            setLblErrorFormatCurrent(`Esta imagen pesa: ${(file.size / (1024 * 1024)).toFixed(2)} MB.`);
+                              e.target.value = ''; // Limpiar la selección del archivo
+                              return;
                           }
-                        };
-                        reader.readAsDataURL(file);
+              
+                          // Validar el formato del archivo
+                          if (!allowedFormats.includes(file.type)) {
+                              // Extraer el subtipo del tipo MIME (por ejemplo, "jpeg" de "image/jpeg")
+                              const fileType = file.type.split('/')[1]; // Obtener el subtipo
+                              setLblError(`Formatos admitidos JPEG, JPG o PNG.`);
+                              setLblErrorFormatCurrent(`Esta imagen tiene un formato: ${fileType}`);
+                              // alert(`El formato del archivo debe ser JPEG, JPG o PNG.\nEsta imagen es: ${fileType}`);
+                              e.target.value = ''; // Limpiar la selección del archivo
+                              return;
+                          }
+              
+                          setLblError('Imagen correcta.');
+                          setLblErrorFormatCurrent('');
+                          setLblCorrectFormat(true);
+                          // Si las validaciones pasan, leer la imagen
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                              if (reader.result) {
+                                  setPhoto(reader.result.toString());
+                              }
+                          };
+                          reader.readAsDataURL(file);
                       }
-                    }}
+                  }}
                     disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
                   />
                   <label htmlFor="fileInput">
@@ -576,7 +638,7 @@ const UserList = () => {
                       alt="Preview"
                       style={{
                         width: '80%',
-                        height: '203px',
+                        height: '188px',
                         cursor: 'pointer',
                         objectFit: 'fill',
                         borderRadius:'1vw'
@@ -585,6 +647,15 @@ const UserList = () => {
                   </label>
                 </Box>
               </Tooltip>
+              <Box display="flex" flexDirection="column" alignItems="flex-start">
+            <label htmlFor="fileInput" style={{ display: 'block', color: lblCorrectFormat?'green':'red', fontSize:12 }}>
+                {lblError}
+            </label>
+            <label htmlFor="fileInput" style={{ display: 'block', color: lblCorrectFormat?'green':'red', fontSize:12 }}>
+                {lblErrorFormatCurrent }
+            </label>
+        </Box>
+
               <Box>
                 <FormControl fullWidth >
                   <Select
@@ -594,8 +665,6 @@ const UserList = () => {
                       const selectedBranch = initialRolesAux.find((branch) => branch._id === selectedBranchId);
 
                       const selectedBranchName = selectedBranch ? selectedBranch.type : '';
-
-                      console.log(selectedBranchName, selectedBranchId)
                       
                       setSelectedRolAux(selectedBranchId);
                       setRolAux(selectedBranchName); 
@@ -612,7 +681,7 @@ const UserList = () => {
                 </FormControl>
               </Box>
               <Box mb={2}>
-                <TextField label="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} fullWidth 
+                <TextField label="Contraseña" value={password === "" ? "******": password} onChange={(e) => setPassword(e.target.value)} fullWidth 
                   style={{display:localStorage.getItem('isAdmin') ==="Empleado" ? 'none' : 'block'}}
                   />
               </Box>
@@ -633,7 +702,7 @@ const UserList = () => {
                   }}
                   variant="contained"
                   color="primary"
-                  disabled={!firstName || !lastName || !selectedSpecialty || !selectedBranch || localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
+                  disabled={!firstName || !lastName || !selectedSpecialty || !selectedBranch || localStorage.getItem('isAdmin') ==="Empleado" || !lblCorrectFormat ? true : false}
                 >
                   Actualizar
                 </Button>
@@ -657,7 +726,7 @@ const UserList = () => {
                 }}
                 variant="contained"
                 color="primary"
-                disabled={!firstName || !lastName || !middleName || !selectedSpecialty || !selectedBranch}
+                disabled={!firstName || !lastName || !middleName || !selectedSpecialty || !selectedBranch || !lblCorrectFormat}
               >
                 Agregar
               </Button>
@@ -698,6 +767,14 @@ const UserList = () => {
       />
       <br />
       <div>
+      <Box display="flex" flexDirection="row" alignItems="flex-start">
+        <h3>
+          NOTA: 
+          <label htmlFor="fileInput" style={{ display: 'block', fontSize: 14 }}>
+            El tamaño máximo para subir una imagen es de 3 MB. y los formatos aceptados son: JPG, PNG, JPEG.
+        </label>
+        </h3>
+      </Box>
         <Button variant="contained" color="primary" onClick={() => openModal(selectedUserId)} disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}>
           NUEVO
         </Button>

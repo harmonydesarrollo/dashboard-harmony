@@ -35,7 +35,6 @@ const LoginPage: React.FC = () => {
         const response = await authServices.Auth(dtoAuxLogin, "");
         
         if (response.code === 200) {
-          // console.log('entro?')
           // Store user data in localStorage
 
           localStorage.setItem('isAdmin', response.items[0].username);

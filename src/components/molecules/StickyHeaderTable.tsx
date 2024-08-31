@@ -94,13 +94,12 @@ const StickyHeaderTable: React.FC<StickyHeaderTableProps> = ({ headers, rows, on
       updatedRows.splice(deleteRowData.index, 1);
       setFilteredRows(updatedRows);
       setDeleteRowData({ index: null, userId: null, username: null }); // Resetear el estado del índice de fila seleccionada
-      // console.log(`Se eliminó al usuario con ID: ${userId}`); // Convertir userId a número antes de mostrarlo
+      
     }
   };
 
   const handleConfirmEdit = () => {
     // Aquí puedes implementar la lógica para editar la fila, por ejemplo, abrir un modal de edición o enviar los datos al servidor
-    // console.log(`Se editó al usuario con ID: ${editRowData.userId}`);
     // Después de editar, reseteamos el estado de editRowData
     setEditRowData({ index: null, userId: null, username: null });
   };
