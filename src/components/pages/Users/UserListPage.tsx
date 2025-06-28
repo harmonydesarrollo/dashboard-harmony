@@ -255,7 +255,7 @@ const UserList = () => {
 
   const handleUpdateUser = async () => {
     let auxPhoto = photo;
-    const containsBucketHarmony = photo.includes('bucket-harmony');
+    const containsBucketHarmony = photo.includes('harmony-web');
 
     if (!containsBucketHarmony) {
       const fileInput = document.getElementById('fileInput') as HTMLInputElement;

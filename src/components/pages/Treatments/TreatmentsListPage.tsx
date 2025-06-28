@@ -225,7 +225,7 @@ const TreatmentList = () => {
   const clearInputFields = () => {
     setTitle('');
     setDescription('');
-    setImg('https://bucket-harmony.s3.amazonaws.com/tratamientos.jpeg');
+    setImg('https://harmony-web.s3.us-east-1.amazonaws.com/tratamientos.jpg');
     setSelectedReview(null);
     setSelectedBranch('');
   };
@@ -426,7 +426,7 @@ const TreatmentList = () => {
               <label htmlFor="fileInput">
                 <img
                   //
-                  src={img || 'https://bucket-harmony.s3.amazonaws.com/tratamientos.jpeg'}
+                  src={img || 'https://harmony-web.s3.us-east-1.amazonaws.com/tratamientos.jpg'}
                   alt="Preview"
                   style={{
                     width: '100%',

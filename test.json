@@ -11,7 +11,7 @@
       "idSpecialty": "6628e08477762c4910c36187",
       "idBranch": "662741f6ac5568ad604b8b48",
       "idRol": "66274451ac5568ad604b8b4c",
-      "photo": "https://bucket-harmony.s3.amazonaws.com/test-profile-baushell.jpeg",
+      "photo": "https://harmony-web.s3.us-east-1.amazonaws.com/test-profile-baushell.jpeg",
       "specialty": "Fisioterapia General"
     }
   },
@@ -27,7 +27,7 @@
       "idSpecialty": "6628e09177762c4910c36188",
       "idBranch": "662741f6ac5568ad604b8b48",
       "idRol": "66274451ac5568ad604b8b4c",
-      "photo": "https://bucket-harmony.s3.amazonaws.com/test-profile-baushell.jpeg",
+      "photo": "https://harmony-web.s3.us-east-1.amazonaws.com/test-profile-baushell.jpeg",
       "specialty": "Fisioterapia niños"
     }
   }

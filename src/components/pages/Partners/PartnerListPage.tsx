@@ -203,7 +203,7 @@ const PartnerList = () => {
     setLblCorrectFormat(false)
     setTitle('');
     setDescription('');
-    setImg('https://bucket-harmony.s3.amazonaws.com/default-logo.png');
+    setImg('https://harmony-web.s3.us-east-1.amazonaws.com/default-logo.png');
     setSelectedReview(null);
   };
 
@@ -378,7 +378,7 @@ const PartnerList = () => {
               <label htmlFor="fileInput">
                 <img
                   //
-                  src={img || 'https://bucket-harmony.s3.amazonaws.com/default-logo.png'}
+                  src={img || 'https://harmony-web.s3.us-east-1.amazonaws.com/default-logo.png'}
                   alt="Preview"
                   style={{
                     width: '33%',

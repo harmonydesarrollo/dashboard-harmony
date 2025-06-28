@@ -29,19 +29,20 @@ import {
   FormHelperText,
 } from '@mui/material';
 
-import { serviceServices } from '../../../services/serviceHarmony/service';
-import { CreateServices, Services, UpdateServices } from '../../types/serviceHarmony';
 import { awsServices } from '../../../services/aws/aws'; // Importar awsServices
 import { Branches } from '../../types/branches';
 import { branchServices } from '../../../services/branches/branches';
 import { generateUniqueId } from '../../utils/generateNamesUniques';
 import { maxSizeBytes, allowedFormats } from '../../utils/megas';
-// import { branchesServices } from '../../../services/branches/branches';
+import { CreateMatrices, Matrices, UpdateMatrices } from '../../types/matrices';
+import { matricesServices } from '../../../services/matrices/matrices';
 
-const ServiceList = () => {
+
+const MatriceList = () => {
   const [selectedBranch, setSelectedBranch] = useState<string>('');
   const [initialBranches, setInitialBranches] = useState<Branches[]>([]);
   const [branch, setBranch] = useState<string>('');
+  
   
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
@@ -49,8 +50,8 @@ const ServiceList = () => {
   const [action, setAction] = useState<string>('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [reviews, setReviews] = useState<Services[]>([]);
-  const [selectedReview, setSelectedReview] = useState<Services | null>(null);
+  const [reviews, setReviews] = useState<Matrices[]>([]);
+  const [selectedReview, setSelectedReview] = useState<Matrices | null>(null);
   const [img, setImg] = useState<string>('');
   const [title, setTitle] = useState<string>('');
   const [description, setDescription] = useState<string>('');
@@ -77,13 +78,14 @@ const ServiceList = () => {
     }
     const fetchReviews = async () => {
       try {
-        const response = await serviceServices.getAllServices('');
+        const response = await matricesServices.getAllMatrices('');
         setReviews(response);
       } catch (error) {
-        console.error('Error fetching services:', error);
+        console.error('Error fetching reviews:', error);
       }
     };
 
+    // branches
     const fetchBranches = async () => {
       try {
         const response = await branchServices.getAllBranches('');
@@ -92,12 +94,12 @@ const ServiceList = () => {
         console.error('Error fetching specialties:', error);
       }
     };
-
+    
     fetchReviews();
     fetchBranches();
   }, []);
 
-  const openModal = (reviewId: string, review: Services | null = null) => {
+  const openModal = (reviewId: string, review: Matrices | null = null) => {
     const selectedReviewData = reviews.find((r) => r._id === reviewId);
 
     if (selectedReviewData) {
@@ -113,7 +115,7 @@ const ServiceList = () => {
   };
 
   const handleAddReview = async () => {
-    const newReview: CreateServices = {
+    const newReview: CreateMatrices = {
       img,
       title,
       description,
@@ -134,17 +136,17 @@ const ServiceList = () => {
         setUpdatePhoto(true); // Se ha cargado una nueva foto
       }
 
-      await serviceServices.createService(newReview, ''); // Crear la reseña en el backend
-      const updatedReviews = await serviceServices.getAllServices('');
+      await matricesServices.createMatrices(newReview, ''); // Crear la reseña en el backend
+      const updatedReviews = await matricesServices.getAllMatrices('');
       setReviews(updatedReviews);
       clearInputFields();
       closeModal();
       setAction('AGREGADA');
       setSuccessOpen(true);
-      setSuccessMessage('Servicio agregado correctamente');
+      setSuccessMessage('Se agregó correctamente');
       // setConfirmOpen(true); // Aquí se cierra la modal de confirmación después de eliminar la reseña
     } catch (error) {
-      console.error('Error al agregar servicio:', error);
+      console.error('Error al agregar una instalacion:', error);
     }
   };
 
@@ -152,7 +154,7 @@ const ServiceList = () => {
     if (selectedReview) {
       setUpdating(true); // Mostrar fondo oscuro y el indicador de carga
 
-      const updatedReview: UpdateServices = {
+      const updatedReview: UpdateMatrices = {
         _id: selectedReview._id,
         img,
         title,
@@ -170,12 +172,12 @@ const ServiceList = () => {
             // Crear un nuevo archivo con el nombre único
             const newFile = new File([file], uniqueFileName, { type: file.type });
             
-             const photoUrl: any = await awsServices.insertImgInS3(newFile, ''); // Subir imagen al servicio S3;
+             const photoUrl: any = await awsServices.insertImgInS3(newFile, ''); // Subir imagen al servicio S3
             updatedReview.img = decodeURIComponent(photoUrl.fileUrl); // Actualizar URL de imagen en la reseña
           }
         }
 
-        await serviceServices.updateById(selectedReview._id, updatedReview, ''); // Actualizar la reseña en el backend
+        await matricesServices.updateById(selectedReview._id, updatedReview, ''); // Actualizar la reseña en el backend
         const updatedReviews = reviews.map((review) =>
           review._id === selectedReview._id ? { ...review, img, title, description, idBranch: selectedBranch } : review
         );
@@ -183,13 +185,13 @@ const ServiceList = () => {
         setReviews(updatedReviews);
         clearInputFields();
         closeModal();
-        setAction('ACTUALIZADA');
+        setAction('ACTUALIZADO');
         setSuccessOpen(true);
-        setSuccessMessage('Servicio actualizado correctamente');
+        setSuccessMessage('Se actualizó correctamente');
         setUpdating(false); // Ocultar fondo oscuro y el indicador de carga después de completar la actualización
         setConfirmOpen(false); // Aquí se cierra la modal de confirmación después de eliminar la reseña
       } catch (error) {
-        console.error('Error al actualizar servicio:', error);
+        console.error('Error al actualizar instalación:', error);
       }
     }
   };
@@ -197,18 +199,18 @@ const ServiceList = () => {
   const handleDeleteReview = async () => {
     if (selectedReview) {
       try {
-        await serviceServices.deleteServices(selectedReview._id, '');
+        await matricesServices.deleteMatrices(selectedReview._id, '');
         const updatedReviews = reviews.filter((review) => review._id !== selectedReview._id);
 
         setReviews(updatedReviews);
         clearInputFields();
         closeModal();
-        setAction('ELIMINADA');
+        setAction('ELIMINADO');
         setSuccessOpen(true);
-        setSuccessMessage('Servicio eliminado correctamente');
+        setSuccessMessage('Se eliminó correctamente');
         setConfirmOpen(false); // Aquí se cierra la modal de confirmación después de eliminar la reseña
       } catch (error) {
-        console.error('Error al eliminar servicio:', error);
+        console.error('Error al eliminar Instalación:', error);
       }
     }
   };
@@ -220,12 +222,9 @@ const ServiceList = () => {
   };
 
   const clearInputFields = () => {
-    setLblError('');
-    setLblErrorFormatCurrent('');
-    setLblCorrectFormat(false)
     setTitle('');
     setDescription('');
-    setImg('https://harmony-web.s3.us-east-1.amazonaws.com/servicios.jpg');
+    setImg('https://harmony-web.s3.us-east-1.amazonaws.com/instalaciones.jpeg');
     setSelectedReview(null);
     setSelectedBranch('');
   };
@@ -273,7 +272,7 @@ const ServiceList = () => {
         </Stack>
       )}
       <Typography variant="h3" align="justify">
-        LISTADO DE SERVICIO
+        Instalaciones
       </Typography>
       <Tooltip title="Buscar por nombre">
         <TextField
@@ -308,7 +307,7 @@ const ServiceList = () => {
                 <TableCell>{review.title}</TableCell>
                 <TableCell>{review.description}</TableCell>
                 <TableCell>
-                  <img src={review.img} alt="Services" style={{ width: '100px', height: '100px', borderRadius: '50%' }} />
+                  <img src={review.img} alt="Review" style={{ width: '100px', height: '100px' }} />
                 </TableCell>
               </TableRow>
             ))}
@@ -325,7 +324,7 @@ const ServiceList = () => {
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
       <Dialog open={modalOpen} onClose={closeModal}>
-        <DialogTitle>{selectedReview ? 'Editar Servicio' : 'Agregar Servicio'}</DialogTitle>
+        <DialogTitle>{selectedReview ? 'Editar Datos' : 'Agregar Datos'}</DialogTitle>
         <DialogContent>
           <TextField
             margin="normal"
@@ -374,7 +373,7 @@ const ServiceList = () => {
               <br/>
           <br/>
           {/* Input para cargar imágenes */}
-          <Tooltip title={localStorage.getItem('isAdmin') ==="Empleado" ? "No tienes permiso de cambiar la imagen" : "Buscar imagen representativa"}>
+          <Tooltip title={localStorage.getItem('isAdmin') ==="Empleado" ? "No tienes permiso de cambiar la imagen" : "Busca la imagen de la instalación"}>
             <Box mb={2} textAlign="center">
               <input
                 id="fileInput"
@@ -382,51 +381,51 @@ const ServiceList = () => {
                 accept="image/*"
                 style={{ display: 'none' }}
                 onChange={(e) => {
-                  const file = e.target.files && e.target.files[0];
-                  if (file) {
-                      const maxSizeMB = 3; // Tamaño máximo en MB
-                      const allowedFormats = ['image/jpeg', 'image/png']; // Formatos permitidos
-                      const maxSizeBytes = maxSizeMB * 1024 * 1024; // Convertir MB a bytes
-          
-                      setLblCorrectFormat(false);
-                      // Validar el tamaño del archivo
-                      if (file.size > maxSizeBytes) {
-                        setLblError(`El tamaño de la imagen debe ser de ${maxSizeMB} MB o menos.`);
-                        setLblErrorFormatCurrent(`Esta imagen pesa: ${(file.size / (1024 * 1024)).toFixed(2)} MB.`);
-                          e.target.value = ''; // Limpiar la selección del archivo
-                          return;
-                      }
-          
-                      // Validar el formato del archivo
-                      if (!allowedFormats.includes(file.type)) {
-                          // Extraer el subtipo del tipo MIME (por ejemplo, "jpeg" de "image/jpeg")
-                          const fileType = file.type.split('/')[1]; // Obtener el subtipo
-                          setLblError(`El formato del archivo debe ser JPEG, JPG o PNG.`);
-                          setLblErrorFormatCurrent(`Esta imagen es: ${fileType}`);
-                          // alert(`El formato del archivo debe ser JPEG, JPG o PNG.\nEsta imagen es: ${fileType}`);
-                          e.target.value = ''; // Limpiar la selección del archivo
-                          return;
-                      }
-          
-                      setLblError('El formato de la imagen es correcto.');
-                      setLblErrorFormatCurrent('El tamaño esta dentro del rango admitido.');
-                      setLblCorrectFormat(true);
-                      // Si las validaciones pasan, leer la imagen
-                      const reader = new FileReader();
-                      reader.onloadend = () => {
-                          if (reader.result) {
-                              setImg(reader.result.toString());
-                          }
-                      };
-                      reader.readAsDataURL(file);
-                  }
-              }}
+        const file = e.target.files && e.target.files[0];
+        if (file) {
+            const maxSizeMB = 3; // Tamaño máximo en MB
+            const allowedFormats = ['image/jpeg', 'image/png']; // Formatos permitidos
+            const maxSizeBytes = maxSizeMB * 1024 * 1024; // Convertir MB a bytes
+
+            setLblCorrectFormat(false);
+            // Validar el tamaño del archivo
+            if (file.size > maxSizeBytes) {
+              setLblError(`El tamaño de la imagen debe ser de ${maxSizeMB} MB o menos.`);
+              setLblErrorFormatCurrent(`Esta imagen pesa: ${(file.size / (1024 * 1024)).toFixed(2)} MB.`);
+                e.target.value = ''; // Limpiar la selección del archivo
+                return;
+            }
+
+            // Validar el formato del archivo
+            if (!allowedFormats.includes(file.type)) {
+                // Extraer el subtipo del tipo MIME (por ejemplo, "jpeg" de "image/jpeg")
+                const fileType = file.type.split('/')[1]; // Obtener el subtipo
+                setLblError(`El formato del archivo debe ser JPEG, JPG o PNG.`);
+                setLblErrorFormatCurrent(`Esta imagen es: ${fileType}`);
+                // alert(`El formato del archivo debe ser JPEG, JPG o PNG.\nEsta imagen es: ${fileType}`);
+                e.target.value = ''; // Limpiar la selección del archivo
+                return;
+            }
+
+            setLblError('El formato de la imagen es correcto.');
+            setLblErrorFormatCurrent('El tamaño esta dentro del rango admitido.');
+            setLblCorrectFormat(true);
+            // Si las validaciones pasan, leer la imagen
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                if (reader.result) {
+                    setImg(reader.result.toString());
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    }}
                 disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}
               />
               <label htmlFor="fileInput">
                 <img
                   //
-                  src={img || 'https://harmony-web.s3.us-east-1.amazonaws.com/servicios.jpg'}
+                  src={img || 'https://harmony-web.s3.us-east-1.amazonaws.com/instalaciones.jpeg'}
                   alt="Preview"
                   style={{
                     width: '100%',
@@ -447,6 +446,7 @@ const ServiceList = () => {
                 {lblErrorFormatCurrent }
             </label>
         </Box>
+          
           {/* Fin del input para cargar imágenes */}
         </DialogContent>
         <DialogActions>
@@ -472,7 +472,7 @@ const ServiceList = () => {
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
         <DialogTitle>Confirmar Eliminación</DialogTitle>
         <DialogContent>
-          <Typography variant="body1">¿Está seguro de que desea eliminar este servicio?</Typography>
+          <Typography variant="body1">¿Está seguro de que desea eliminar este registro?</Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setConfirmOpen(false)} variant="outlined" color="primary">
@@ -491,12 +491,11 @@ const ServiceList = () => {
         </label>
         </h3>
       </Box>
-      <Button onClick={() => openModal('', null)} variant="contained" color="primary" 
-        disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}>
+      <Button onClick={() => openModal('', null)} variant="contained" color="primary" disabled={localStorage.getItem('isAdmin') ==="Empleado" ? true : false}>
         NUEVO
       </Button>
     </Container>
   );
 };
 
-export default ServiceList;
+export default MatriceList;

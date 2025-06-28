@@ -203,7 +203,7 @@ const ReviewList = () => {
     setLblCorrectFormat(false)
     setTitle('');
     setDescription('');
-    setImg('https://bucket-harmony.s3.amazonaws.com/defualt2.png');
+    setImg('https://harmony-web.s3.us-east-1.amazonaws.com/defualt2.png');
     setSelectedReview(null);
   };
 
@@ -398,7 +398,7 @@ const ReviewList = () => {
               <label htmlFor="fileInput">
                 <img
                   //
-                  src={img || 'https://bucket-harmony.s3.amazonaws.com/defualt2.png'}
+                  src={img || 'https://harmony-web.s3.us-east-1.amazonaws.com/defualt2.png'}
                   alt="Preview"
                   style={{
                     width: '33%',

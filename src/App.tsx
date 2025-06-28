@@ -13,6 +13,7 @@ import VideoList from './components/pages/Videos/VideosListPage';
 import QuestionList from './components/pages/Questions/QuestionListPage';
 import BranchList from './components/pages/Branches/BranchesListPage';
 import PrivateRoute from './components/organisms/PrivateRoute';
+import MatriceList from './components/pages/Matrices/MatriceListPage';
 
 const App: React.FC = () => {
   return (
@@ -30,6 +31,7 @@ const App: React.FC = () => {
           <Route path="/questions" element={<AdminTemplate><QuestionList /></AdminTemplate>} />
           <Route path="/branches" element={<AdminTemplate><BranchList /></AdminTemplate>} />
           <Route path="/appointment" element={<AdminTemplate><AppointmentList /></AdminTemplate>} />
+          <Route path="/matrices" element={<AdminTemplate><MatriceList /></AdminTemplate>} />
         </Route>
       </Routes>
     </Router>
