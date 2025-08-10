@@ -26,12 +26,12 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 
 // Función para prevenir el clic derecho
-const preventRightClick = (e: MouseEvent) => {
-    e.preventDefault();
-};
+// const preventRightClick = (e: MouseEvent) => {
+//     e.preventDefault();
+// };
 
 // Añadir event listener para capturar el clic derecho en el documento
-document.addEventListener('contextmenu', preventRightClick);
+// document.addEventListener('contextmenu', preventRightClick);
 
 ReactDOM.render(
     <React.StrictMode>
